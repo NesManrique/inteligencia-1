@@ -16,7 +16,6 @@ short manhattan(State s){
             printf("r %d\n",r);
         }
     }
-
     return r;
 }
 
