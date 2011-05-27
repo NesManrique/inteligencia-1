@@ -40,7 +40,7 @@ int expandir(State s, State * neighbors){
                     t >>= 4;
                     temp.tablero[wx] &= ~(masks[wy-1]);
                     temp.tablero[wx] |= t;
-                    if(lookup[t>>((3-wy)<<2)][1] < wy){
+                    if(lookup[t>>((4-wy)<<2)][1] < wy){
                         temp.h = s.h+1;
                         temp.steps = s.steps+1;
                     }else{
@@ -79,7 +79,7 @@ int expandir(State s, State * neighbors){
                     t <<= 4;
                     temp.tablero[wx] &= ~(masks[wy + 1]);
                     temp.tablero[wx] |= t;
-                    if(lookup[t>>((3-wy)<<2)][1] > wy){
+                    if(lookup[t>>((2-wy)<<2)][1] > wy){
                         temp.h = s.h+1;
                         temp.steps = s.steps+1;
                     }else{
@@ -121,7 +121,10 @@ int dfs(short sc, State s, int cl, bool &ok){
 
     short cm = sc + s.h;
     if(cm > cl) return cm;
-    if(puzzle::isGoal(s)) ok = true ;
+    if(puzzle::isGoal(s)){
+		ok = true ;
+		return sc;
+	}
     
     int ncl = 32767;
     State succ[4];
@@ -154,9 +157,9 @@ int puzzle::solve(State s){
 
 int main(){
     
-    int arr[16] = {10,1,3,6,2,5,7,8,9,0,11,13,12,14,15,4};
+    int arr[16] = {15,2,5,7,13,8,3,6,11,4,0,1,14,9,12,10};
  //   int hijos, i;
-    puzzle p(arr, 2,1);
+    puzzle p(arr, 0,1);
     printf("tablero inicial\n");
     imprimir(p.ini);
 /*    State n[4];
