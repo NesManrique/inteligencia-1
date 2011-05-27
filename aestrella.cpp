@@ -3,7 +3,113 @@ using namespace std;
 
 short lookup[16][2] = {{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3},{2,0},{2,1},{2,2},{2,3},{3,0},{3,1},{3,2},{3,3}};
 
-/* Funcion que expande un estado */
+//expansiones
+
+State expU(State s){
+    short i, n, c = 0;
+    unsigned short t, wx, wy;
+    wx = s.white & 0xf0;
+    wx >>= 4;
+    wy = s.white & 0xf;
+	State temp;
+	temp.h=255;
+	if(wx != 0 && s.lastmove!='d'){
+		memcpy(temp.tablero, s.tablero, 8);
+		t = temp.tablero[wx-1] & masks[wy];
+		temp.tablero[wx-1] &= ~(masks[wy]);
+		temp.tablero[wx] |= t;
+		if(lookup[t >> ((3-wy) << 2)][0] < wx){
+			temp.h = s.h+1;
+		}else{
+			temp.h = s.h-1;
+		}
+		temp.lastmove = 'u';
+		temp.white = s.white-0x10;
+		i++;
+	}
+	return temp;
+}
+
+State expD(State s){
+	short i, n, c = 0;
+	unsigned short t, wx, wy;
+	wx = s.white & 0xf0;
+	wx >>= 4;
+	wy = s.white & 0xf;
+	State temp;
+	temp.h=255;
+	if(wx != 3 && s.lastmove!='u'){
+		memcpy(temp.tablero, s.tablero, 8);
+		t = temp.tablero[wx+1] & masks[wy];
+		temp.tablero[wx+1] &= ~(masks[wy]);
+		temp.tablero[wx] |= t;
+		if(lookup[t>>((3-wy)<<2)][0] > wx){
+			temp.h = s.h+1;
+		}else{
+			temp.h = s.h-1;
+		}
+		temp.lastmove = 'd';
+		temp.white = s.white+0x10;
+		i++;
+	}
+	return temp;
+}
+
+State expL(State s){
+	short i, n, c = 0;
+	unsigned short t, wx, wy;
+	wx = s.white & 0xf0;
+	wx >>= 4;
+	wy = s.white & 0xf;
+	State temp;
+	temp.h=255;
+	if(wy != 0 && s.lastmove!='r'){
+		memcpy(temp.tablero, s.tablero, 8);
+		t = temp.tablero[wx] & masks[wy-1];
+		t >>= 4;
+		temp.tablero[wx] &= ~(masks[wy-1]);
+		temp.tablero[wx] |= t;
+		if(lookup[t>>((3-wy)<<2)][1] < wy){
+			temp.h = s.h+1;
+		}else{
+			temp.h = s.h-1;
+		}
+		temp.lastmove='l';
+		temp.white = s.white-0x01;
+		i++;
+	}
+	return temp;
+}
+
+State expR(State s){
+	short i, n, c = 0;
+	unsigned short t, wx, wy;
+	wx = s.white & 0xf0;
+	wx >>= 4;
+	wy = s.white & 0xf;
+	State temp;
+	temp.h=255;
+	if(wy != 3 && s.lastmove!='l'){
+		memcpy(temp.tablero, s.tablero, 8);
+		t = temp.tablero[wx] & masks[wy + 1];
+		t <<= 4;
+		temp.tablero[wx] &= ~(masks[wy + 1]);
+		temp.tablero[wx] |= t;
+		if(lookup[t>>((3-wy)<<2)][1] > wy){
+			temp.h = s.h+1;
+		}else{
+			temp.h = s.h-1;
+		}
+		temp.lastmove='r';
+		temp.white = s.white+0x01;
+		i++;
+//	imprimir(temp);
+	}
+//	imprimir(temp);
+//	printf("AAAAAAAAA\n");
+	return temp;
+}
+/* Funcion que expande un estado 
 int expandir(State s, State * neighbors){
 
     short i, n, c = 0;
@@ -14,7 +120,7 @@ int expandir(State s, State * neighbors){
     for(n=0, i=0 ; n<4; n++){
         switch(n){
             case 0:
-                if(wx != 0){
+                if(wx != 0 && s.lastmove!='d'){
                     State temp;
                     memcpy(temp.tablero, s.tablero, 8);
                     t = temp.tablero[wx-1] & masks[wy];
@@ -22,18 +128,17 @@ int expandir(State s, State * neighbors){
                     temp.tablero[wx] |= t;
                     if(lookup[t >> ((3-wy) << 2)][0] < wx){
                         temp.h = s.h+1;
-                        temp.steps = s.steps+1;
                     }else{
                         temp.h = s.h-1;
-                        temp.steps = s.steps+1;
                     }
+					temp.lastmove = 'u';
                     temp.white = s.white-0x10;
                     neighbors[i]=temp;
                     i++;
                 }
                 break;
             case 1:
-                if(wy != 0){
+                if(wy != 0 && s.lastmove!='r'){
                     State temp;
                     memcpy(temp.tablero, s.tablero, 8);
                     t = temp.tablero[wx] & masks[wy-1];
@@ -42,18 +147,17 @@ int expandir(State s, State * neighbors){
                     temp.tablero[wx] |= t;
                     if(lookup[t>>((4-wy)<<2)][1] < wy){
                         temp.h = s.h+1;
-                        temp.steps = s.steps+1;
                     }else{
                         temp.h = s.h-1;
-                        temp.steps = s.steps+1;
                     }
+	                temp.lastmove='l';
                     temp.white = s.white-0x01;
                     neighbors[i]=temp;
                     i++;
                 }
                 break;
             case 2:
-                if(wx != 3){
+                if(wx != 3 && s.lastmove='u'){
                     State temp;
                     memcpy(temp.tablero, s.tablero, 8);
                     t = temp.tablero[wx+1] & masks[wy];
@@ -61,18 +165,17 @@ int expandir(State s, State * neighbors){
                     temp.tablero[wx] |= t;
                     if(lookup[t>>((3-wy)<<2)][0] > wx){
                         temp.h = s.h+1;
-                        temp.steps = s.steps+1;
                     }else{
                         temp.h = s.h-1;
-                        temp.steps = s.steps+1;
                     }
+                    temp.lastmove = 'd';
                     temp.white = s.white+0x10;
                     neighbors[i]=temp;
                     i++;
                 }
                 break;
             case 3:
-                if(wy != 3){
+                if(wy != 3 && s.lastmove='l'){
                     State temp;
                     memcpy(temp.tablero, s.tablero, 8);
                     t = temp.tablero[wx] & masks[wy + 1];
@@ -81,11 +184,10 @@ int expandir(State s, State * neighbors){
                     temp.tablero[wx] |= t;
                     if(lookup[t>>((2-wy)<<2)][1] > wy){
                         temp.h = s.h+1;
-                        temp.steps = s.steps+1;
                     }else{
                         temp.h = s.h-1;
-                        temp.steps = s.steps+1;
                     }
+					temp.lastmove='r';
                     temp.white = s.white+0x01;
                     neighbors[i]=temp;
                     i++;
@@ -93,10 +195,10 @@ int expandir(State s, State * neighbors){
                 break;
         }
     }
-
     return i;
-
 }
+*/
+
 
 short manhattan(State s){
 
@@ -118,7 +220,6 @@ short puzzle::heuristica(State s){
 }
 
 int dfs(short sc, State s, int cl, bool &ok){
-
     short cm = sc + s.h;
     if(cm > cl) return cm;
     if(puzzle::isGoal(s)){
@@ -127,7 +228,38 @@ int dfs(short sc, State s, int cl, bool &ok){
 	}
     
     int ncl = 32767;
-    State succ[4];
+
+    short i=0;
+    int ret;
+    for(i=0;i<4;i++){
+		State succ;
+		switch(i){
+			case 0:
+				succ=expU(s);
+				break;
+			case 1:
+				succ=expR(s);
+				break;
+			case 2:
+				succ=expD(s);
+				break;
+			case 3:
+				succ=expL(s);
+				break;
+		}
+		if (succ.h==255){
+		//	imprimir(succ);
+			continue;
+		}
+		//imprimir(succ);
+        ret = dfs(sc+1, succ, cl, ok);
+        if(ok) return ret;
+        if(ncl > ret) ncl = ret;
+	} 
+	return ncl;
+	
+	/*    State succ[4];
+
     int hijos = expandir(s,succ);
     short i=0;
     int ret;
@@ -137,9 +269,8 @@ int dfs(short sc, State s, int cl, bool &ok){
         ret = dfs(sc+1, succ[i], cl, ok);
         if(ok) return ret;
         if(ncl > ret) ncl = ret;
-    }
-        
-    return ncl;
+    } 
+    return ncl;*/
 }
 
 int puzzle::solve(State s){
@@ -147,9 +278,10 @@ int puzzle::solve(State s){
     int cl = s.h;
     bool ok = false;
     while(1){
-		printf("cl %d\n",cl);
+		printf("cl %d %d\n",cl,ok);
         int ret = dfs(0,s,cl,ok);
         if(ok) return ret;
+		if(ret>3000) return -1;
         cl = ret;
     }
 }
@@ -159,7 +291,7 @@ int main(){
     
     int arr[16] = {15,2,5,7,13,8,3,6,11,4,0,1,14,9,12,10};
  //   int hijos, i;
-    puzzle p(arr, 0,1);
+    puzzle p(arr, 2,2);
     printf("tablero inicial\n");
     imprimir(p.ini);
 /*    State n[4];

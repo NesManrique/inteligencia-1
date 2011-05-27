@@ -9,7 +9,7 @@ const short masks[4] = {0xf000, 0x0f00, 0x00f0, 0x000f};
 struct State{
     unsigned short tablero [4];
     unsigned char white;
-    unsigned char steps;
+    char lastmove;
     unsigned char h;
 };
 
@@ -19,7 +19,7 @@ void imprimir(State s){
     printf("        %x\n",s.tablero[1]);
     printf("        %x\n",s.tablero[2]);
     printf("        %x\n",s.tablero[3]);
-    printf("pasos %d\n",s.steps);
+    printf("lastmove %c\n",s.lastmove);
     printf("heuristica %d\n",s.h);
     printf("blanco %x\n\n", s.white);
 }
@@ -49,7 +49,7 @@ class puzzle{
         k <<= 4;
         k |= whitey;
         ini.white = k;
-        ini.steps =0; 
+        ini.lastmove = 'i'; 
         ini.h=heuristica(ini);
     }
 
