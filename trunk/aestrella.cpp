@@ -27,7 +27,7 @@ int expandir(State s, State * neighbors){
                         temp.h = s.h-1;
                         temp.steps = s.steps+1;
                     }
-                    temp.white -= 0x10;
+                    temp.white = s.white-0x10;
                     neighbors[i]=temp;
                     i++;
                 }
@@ -46,7 +46,7 @@ int expandir(State s, State * neighbors){
                         temp.h = s.h-1;
                         temp.steps = s.steps+1;
                     }
-                    temp.white += 0x10;
+                    temp.white = s.white+0x10;
                     neighbors[i]=temp;
                     i++;
                 }
@@ -66,7 +66,7 @@ int expandir(State s, State * neighbors){
                         temp.h = s.h-1;
                         temp.steps = s.steps+1;
                     }
-                    temp.white -= 0x01;
+                    temp.white = s.white-0x01;
                     neighbors[i]=temp;
                     i++;
                 }
@@ -86,7 +86,7 @@ int expandir(State s, State * neighbors){
                         temp.h = s.h-1;
                         temp.steps = s.steps+1;
                     }
-                    temp.white += 0x01;
+                    temp.white = s.white+0x01;
                     neighbors[i]=temp;
                     i++;
                 }
