@@ -20,7 +20,7 @@ int expandir(State s, State * neighbors){
                     t = temp.tablero[wx-1] & masks[wy];
                     temp.tablero[wx-1] &= ~(masks[wy]);
                     temp.tablero[wx] |= t;
-                    if(lookup[t >> ((3-wx) << 2)][0] < wx){
+                    if(lookup[t >> ((3-wy) << 2)][0] < wx){
                         temp.h = s.h+1;
                         temp.steps = s.steps+1;
                     }else{
@@ -33,25 +33,6 @@ int expandir(State s, State * neighbors){
                 }
                 break;
             case 1:
-                if(wx != 3){
-                    State temp;
-                    memcpy(temp.tablero, s.tablero, 8);
-                    t = temp.tablero[wx+1] & masks[wy];
-                    temp.tablero[wx+1] &= ~(masks[wy]);
-                    temp.tablero[wx] |= t;
-                    if(lookup[t>>((3-wx)<<2)][0] > wx){
-                        temp.h = s.h+1;
-                        temp.steps = s.steps+1;
-                    }else{
-                        temp.h = s.h-1;
-                        temp.steps = s.steps+1;
-                    }
-                    temp.white = s.white+0x10;
-                    neighbors[i]=temp;
-                    i++;
-                }
-                break;
-            case 2:
                 if(wy != 0){
                     State temp;
                     memcpy(temp.tablero, s.tablero, 8);
@@ -67,6 +48,25 @@ int expandir(State s, State * neighbors){
                         temp.steps = s.steps+1;
                     }
                     temp.white = s.white-0x01;
+                    neighbors[i]=temp;
+                    i++;
+                }
+                break;
+            case 2:
+                if(wx != 3){
+                    State temp;
+                    memcpy(temp.tablero, s.tablero, 8);
+                    t = temp.tablero[wx+1] & masks[wy];
+                    temp.tablero[wx+1] &= ~(masks[wy]);
+                    temp.tablero[wx] |= t;
+                    if(lookup[t>>((3-wy)<<2)][0] > wx){
+                        temp.h = s.h+1;
+                        temp.steps = s.steps+1;
+                    }else{
+                        temp.h = s.h-1;
+                        temp.steps = s.steps+1;
+                    }
+                    temp.white = s.white+0x10;
                     neighbors[i]=temp;
                     i++;
                 }
@@ -128,7 +128,9 @@ int dfs(short sc, State s, int cl, bool &ok){
     int hijos = expandir(s,succ);
     short i=0;
     int ret;
+//	printf("hijos %d\n",hijos);
     for(i=0;i<hijos;i++){
+//		imprimir(succ[i]);
         ret = dfs(sc+1, succ[i], cl, ok);
         if(ok) return ret;
         if(ncl > ret) ncl = ret;
@@ -142,6 +144,7 @@ int puzzle::solve(State s){
     int cl = s.h;
     bool ok = false;
     while(1){
+		printf("cl %d\n",cl);
         int ret = dfs(0,s,cl,ok);
         if(ok) return ret;
         cl = ret;
@@ -152,18 +155,18 @@ int puzzle::solve(State s){
 int main(){
     
     int arr[16] = {10,1,3,6,2,5,7,8,9,0,11,13,12,14,15,4};
-    int hijos, i;
+ //   int hijos, i;
     puzzle p(arr, 2,1);
     printf("tablero inicial\n");
     imprimir(p.ini);
-    State n[4];
+/*    State n[4];
     hijos = expandir(p.ini, n);
     printf("hay %d hijos\n",hijos);
-    for(i=0; i<hijos; i++){
+*    for(i=0; i<hijos; i++){
         imprimir(n[i]);
     }
-
-    cout << puzzle::isGoal(p.ini);
+*/
+   // cout << puzzle::isGoal(p.ini);
 
     printf("solve %d\n", p.solve(p.ini));
     
