@@ -291,7 +291,7 @@ int main(){
     
     int arr[16] = {15,2,5,7,13,8,3,6,11,4,0,1,14,9,12,10};
  //   int hijos, i;
-    puzzle p(arr, 2,2);
+    puzzle p(arr, 2,1);
     printf("tablero inicial\n");
     imprimir(p.ini);
 /*    State n[4];

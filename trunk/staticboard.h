@@ -1,31 +1,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <iostream>
-using namespace std;
+//#include <iostream>
+//using namespace std;
 
 const short masks[4] = {0xf000, 0x0f00, 0x00f0, 0x000f};
 
-struct estado{
+typedef struct estado{
     unsigned short tablero [4][4];
     unsigned short white [2];
     unsigned short h;
 } State;
 
+/* Funcion que calcula la heuristica */
+short heuristica(State s);
+
 /* Constructor */
 State sboard(){
 
     State board;
-    printf("Escribe el tablero < 1 3 0 4 7 10 9...> :\n");
-    scanf("%d %d %d %d %d %d %d %d %d %d 
-        %d %d %d %d %d %d", board.tablero[0][0], board.tablero[0][1], board.tablero[0][2], board.tablero[0][3], 
-        board.tablero[1][0], board.tablero[1][1], board.tablero[1][2], board.tablero[1][3], board.tablero[2][0], 
-        board.tablero[2][1], board.tablero[2][2], board.tablero[2][3], board.tablero[3][0], board.tablero[3][1], 
-        board.tablero[3][2], board.tablero[3][3]);
+	int i,j,n;
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			scanf("%d",&n);
+			board.tablero[i][j]=n;
+			if(n==0){
+				board.white[0]=i;
+				board.white[1]=j;
+			}
+		}
+	}
+  
+	/* scanf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+			&board.tablero[0][0], &board.tablero[0][1], &board.tablero[0][2], &board.tablero[0][3],
+			&board.tablero[1][0], &board.tablero[1][1], &board.tablero[1][2], &board.tablero[1][3],
+			&board.tablero[2][0], &board.tablero[2][1], &board.tablero[2][2], &board.tablero[2][3],
+			&board.tablero[3][0], &board.tablero[3][1], &board.tablero[3][2], &board.tablero[3][3]);
     printf("Escribe la posicion del blanco < 0 1 > :\n");
-    scanf("%d %d", board.white[0], board.white[1]);
-
-    board.h = heuristica(board.tablero);
+    scanf("%d %d", &board.white[0], &board.white[1]);
+*/
+    board.h = heuristica(board);
 
     return board;
 }
@@ -125,19 +139,20 @@ void imprimir(State s){
     printf("blanco %d %d\n\n", s.white[0], s.white[1]);
 }
 
-/* Funcion que calcula la heuristica */
-short heuristica(State s);
 
 
 /* Chequea si se llego al goal*/
-static bool isGoal(State s){
+int isGoal(State s){
 
-    if( s.tablero[0] == 0x0123 && s.tablero[1] == 0x4567 &&
-            s.tablero[2] == 0x89ab && s.tablero[3] == 0xcdef){
-        return true;
-    }
-
-    return false;
+	int i,n,j;
+	n=0;
+	for(i=0;i<4;i++){
+		for(j=0;j<4;j++){
+			if(getPos(s,i,j)!=n)return 0;
+			n++;
+		}
+	}
+    return 1;
 }
 
 /* Algoritmo a estrella =) */
