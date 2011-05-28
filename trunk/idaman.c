@@ -61,7 +61,8 @@ short heuristica(State s){
     r = 0;
     for(i=0; i<4; i++){
         for(j=0; j<4; j++){
-            n = getPos(board,i,j);
+            n = getPos(s,i,j);
+			if(n==0)continue;
             r = r + abs(lookup[n][0]-i) + abs(lookup[n][1]-j);
         }
     }
@@ -74,7 +75,7 @@ int dfs(int sc, int cl, char* ok, char dir){
     if(cm > cl) return cm;
     if(isGoal(board)){
 		*ok = 1;
-		printf("fin\n");
+		printf("fin %d\n",sc);
 		return sc;
 	}
     
@@ -143,8 +144,12 @@ int solve(State s){
 }
 
 int main(){
+	while(1){
+
 	board = sboard();
 	imprimir(board);
+
 	solve(board);
+	}
 
 }

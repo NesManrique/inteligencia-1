@@ -44,7 +44,7 @@ State sboard(){
     return board;
 }
 
-unsigned short getPos(State s, short x, short y){
+short getPos(State s, short x, short y){
     return s.tablero[x][y];
 }
 
