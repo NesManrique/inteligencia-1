@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include "staticboard.h"
+#include <time.h>
 
 short lookup[16][2] = {{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3},{2,0},{2,1},{2,2},{2,3},{3,0},{3,1},{3,2},{3,3}};
 
 State board;
+long nodosVis;
 
 void expU(){
 	short wx,wy,h;
@@ -71,11 +73,11 @@ short heuristica(State s){
 
 char dirs[4]={'d','l','r','u'};
 int dfs(int sc, int cl, char* ok, char dir){
+	nodosVis++;
     short cm = sc + getH(board);
     if(cm > cl) return cm;
     if(isGoal(board)){
 		*ok = 1;
-		printf("fin %d\n",sc);
 		return sc;
 	}
     
@@ -144,12 +146,16 @@ int solve(State s){
 }
 
 int main(){
+	int pasos;
+	clock_t begin,end;
 	while(1){
-
 	board = sboard();
+	nodosVis=0;
 	imprimir(board);
-
-	solve(board);
+	begin=clock();
+	pasos=solve(board);
+	end=clock();
+	printf("%d %d %f\n",nodosVis,pasos,((double)end-begin)/CLOCKS_PER_SEC);
 	}
 
 }
