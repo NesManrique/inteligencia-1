@@ -1,10 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <iostream>
-//using namespace std;
-
-const short masks[4] = {0xf000, 0x0f00, 0x00f0, 0x000f};
 
 typedef struct estado{
     unsigned short tablero [4][4];
@@ -31,14 +27,6 @@ State sboard(){
 		}
 	}
   
-	/* scanf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
-			&board.tablero[0][0], &board.tablero[0][1], &board.tablero[0][2], &board.tablero[0][3],
-			&board.tablero[1][0], &board.tablero[1][1], &board.tablero[1][2], &board.tablero[1][3],
-			&board.tablero[2][0], &board.tablero[2][1], &board.tablero[2][2], &board.tablero[2][3],
-			&board.tablero[3][0], &board.tablero[3][1], &board.tablero[3][2], &board.tablero[3][3]);
-    printf("Escribe la posicion del blanco < 0 1 > :\n");
-    scanf("%d %d", &board.white[0], &board.white[1]);
-*/
     board.h = heuristica(board);
 
     return board;
