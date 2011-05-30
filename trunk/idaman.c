@@ -118,13 +118,32 @@ short heuristica(State s){
     return r;
 }
 
-char dirs[4]={'d','l','r','u'};
+void inversemov(short d){
+
+	switch(d){
+			case 0:
+				expD(board);
+				break;
+			case 1:
+				expL(board);
+				break;
+			case 2:
+				expU(board);
+				break;
+			case 3:
+				expR(board);
+				break;
+		}
+}
+
+
+char dirs[4]={'d','l','u','r'};
 int dfs(int sc, int cl, char* ok, char dir){
 	nodosVis++;
     short curnth = getH(board);
     short cm = sc + curnth;
     if(cm > cl) return cm;
-    if(isGoal(board)){
+    if(curnth == 0){
 		*ok = 1;
 		return sc;
 	}
@@ -132,77 +151,49 @@ int dfs(int sc, int cl, char* ok, char dir){
     int ncl = 32767;
     int ret;
     short i, j;
-    short ord[4] = {0,1,2,3}; 
-    short hord[4] = {200, 200, 200, 200};
-	short wx,wy,d;
+	short wx,wy;
 	wx = getWhiteX(board);
 	wy = getWhiteY(board);
 
-    if(wx <= 0) hord[0] = hD();
-	if(wy >= 3) hord[1] = hL();
-	if(wy <= 0) hord[2] = hR();
-	if(wx >= 3) hord[3] = hU();
-
-    for(i=0, j=3; i>=j;){
-        if(hord[i]>curnth){
-            short temp = hord[i];
-            hord[i] = hord[j];
-            hord[j] = temp;
-            temp = ord[i];
-            ord[i] = ord[j];
-            ord[j] = temp;
-            j--;
-        }else{
-            i++;
-        }
-    }
-
+    char t;
     for(i=0;i<4;i++){
-        d = ord[i];
-		State succ;
 		//moviendo
-		switch(d){
+		if(dir == dirs[i]) continue;
+		switch(i){
 			case 0:
-				if(wx <= 0 || dir==dirs[d]) continue;
+				if(wx <= 0 ) continue;
 				expU(board);
+                t='u';
 				break;
 			case 1:
-				if(wy >= 3 || dir==dirs[d]) continue;
+				if(wy >= 3) continue;
 				expR(board);
+                t='r';
 				break;
 			case 2:
-				if(wy <=0 || dir==dirs[d]) continue;
-				expL(board);
+				if(wx >=3) continue;
+				expD(board);
+                t='d';
 				break;
 			case 3:
-				if(wx >= 3 || dir==dirs[d]) continue;
-				expD(board);
+				if(wy <= 0) continue;
+				expL(board);
+                t='l';
 				break;
 		}
 		//imprimir(succ);
-        ret = dfs(sc+1, cl, ok,dirs[3-d]);
+        ret = dfs(sc+1, cl, ok, t);
         if(*ok) return ret;
         if(ncl > ret){ 
             ncl = ret;
         }    
 		//regresando el movimiento
-		switch(d){
-			case 0:
-				expD(board);
-				break;
-			case 1:
-				expL(board);
-				break;
-			case 2:
-				expR(board);
-				break;
-			case 3:
-				expU(board);
-				break;
-		}
+		inversemov(i);
 	}
 	return ncl;
 }
+
+
 
 
 int solve(State s){
