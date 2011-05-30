@@ -13,7 +13,6 @@ short heuristica(State s);
 
 /* Constructor */
 State sboard(){
-
     State board;
 	int i,j,n;
 	for(i=0;i<4;i++){
