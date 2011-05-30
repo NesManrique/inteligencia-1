@@ -57,6 +57,53 @@ void expR(){
 	moveR(&board);
 }
 
+short hU(){
+	short wx,wy,h;
+	wx=getWhiteX(board);
+	wy=getWhiteY(board);
+	h=getH(board);
+	if(lookup[getPos(board,wx-1,wy)][0] < wx){
+	    return h+1;
+	}else{
+		return h-1;
+	}
+}
+
+short hD(){
+	short wx,wy,h;
+	wx=getWhiteX(board);
+	wy=getWhiteY(board);
+	h=getH(board);
+	if(lookup[getPos(board,wx+1,wy)][0] > wx){
+	    return h+1;
+	}else{
+		return h-1;
+	}
+}
+
+short hL(){
+	short wx,wy,h;
+	wx=getWhiteX(board);
+	wy=getWhiteY(board);
+	h=getH(board);
+	if(lookup[getPos(board,wx,wy-1)][1] < wy){
+        return h+1;
+	}else{
+		return h-1;
+	}
+}
+short hR(){
+	short wx,wy,h;
+	wx=getWhiteX(board);
+	wy=getWhiteY(board);
+	h=getH(board);
+	if(lookup[getPos(board,wx,wy+1)][1] > wy){
+		return h+1;
+	}else{
+		return h-1;
+	}
+}
+
 short heuristica(State s){
 
     short i,j,r,n;
@@ -74,7 +121,8 @@ short heuristica(State s){
 char dirs[4]={'d','l','r','u'};
 int dfs(int sc, int cl, char* ok, char dir){
 	nodosVis++;
-    short cm = sc + getH(board);
+    short curnth = getH(board);
+    short cm = sc + curnth;
     if(cm > cl) return cm;
     if(isGoal(board)){
 		*ok = 1;
@@ -82,38 +130,63 @@ int dfs(int sc, int cl, char* ok, char dir){
 	}
     
     int ncl = 32767;
-    short i=0;
     int ret;
-	short wx,wy;
+    short i, j;
+    short ord[4] = {0,1,2,3}; 
+    short hord[4] = {200, 200, 200, 200};
+	short wx,wy,d;
 	wx = getWhiteX(board);
 	wy = getWhiteY(board);
+
+    if(wx <= 0) hord[0] = hD();
+	if(wy >= 3) hord[1] = hL();
+	if(wy <= 0) hord[2] = hR();
+	if(wx >= 3) hord[3] = hU();
+
+    for(i=0, j=3; i>=j;){
+        if(hord[i]>curnth){
+            short temp = hord[i];
+            hord[i] = hord[j];
+            hord[j] = temp;
+            temp = ord[i];
+            ord[i] = ord[j];
+            ord[j] = temp;
+            j--;
+        }else{
+            i++;
+        }
+    }
+
     for(i=0;i<4;i++){
+        d = ord[i];
 		State succ;
 		//moviendo
-		switch(i){
+		switch(d){
 			case 0:
-				if(wx <= 0 || dir==dirs[i]) continue;
+				if(wx <= 0 || dir==dirs[d]) continue;
 				expU(board);
 				break;
 			case 1:
-				if(wy >= 3 || dir==dirs[i]) continue;
+				if(wy >= 3 || dir==dirs[d]) continue;
 				expR(board);
 				break;
 			case 2:
-				if(wy <=0 || dir==dirs[i]) continue;
+				if(wy <=0 || dir==dirs[d]) continue;
 				expL(board);
 				break;
 			case 3:
-				if(wx >= 3 || dir==dirs[i]) continue;
+				if(wx >= 3 || dir==dirs[d]) continue;
 				expD(board);
 				break;
 		}
 		//imprimir(succ);
-        ret = dfs(sc+1, cl, ok,dirs[3-i]);
+        ret = dfs(sc+1, cl, ok,dirs[3-d]);
         if(*ok) return ret;
-        if(ncl > ret) ncl = ret;
+        if(ncl > ret){ 
+            ncl = ret;
+        }    
 		//regresando el movimiento
-		switch(i){
+		switch(d){
 			case 0:
 				expD(board);
 				break;
@@ -127,7 +200,7 @@ int dfs(int sc, int cl, char* ok, char dir){
 				expU(board);
 				break;
 		}
-	} 
+	}
 	return ncl;
 }
 
@@ -149,13 +222,13 @@ int main(){
 	int pasos;
 	clock_t begin,end;
 	while(1){
-	board = sboard();
-	nodosVis=0;
-	imprimir(board);
-	begin=clock();
-	pasos=solve(board);
-	end=clock();
-	printf("%d %d %f\n",nodosVis,pasos,((double)end-begin)/CLOCKS_PER_SEC);
+	    board = sboard();
+	    nodosVis=0;
+	    imprimir(board);
+	    begin=clock();
+	    pasos=solve(board);
+	    end=clock();
+	    printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
 	}
 
 }
