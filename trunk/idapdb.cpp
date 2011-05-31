@@ -19,7 +19,7 @@ const char pm1 [15][2] = {{2,0},{0,0},{0,1},{0,2},{0,3},{0,4},{0,5},{0,6},{1,0},
 char p21 [16][16][16][16][16][16][8];
 char p22 [16][16][16][16][16][16][8];
 char p23 [16];
-const char pm2 [15][2] = {{2,0},{1,0},{1,1},{0,0},{0,1},{1,2},{1,3},{0,2},{0,3},{1,4},{1,5},{0,4},{0,5},{0,6},{1,6}} ;
+const char pm2 [15][2] = {{2,0},{1,0},{1,1},{0,0},{0,1},{1,2},{1,3},{0,2},{0,3},{1,4},{1,5},{0,4},{0,5},{0,6},{1,6}};
 
 long nodosVis;
 
@@ -134,13 +134,13 @@ int bfs(Pattern v,char bd[16][16][16][16][16][16][8]){
         Pattern w = q.front();
 		q.pop();
 //		if(i>1000000){printf("%ld\n",nodosVis);i=0;}
-		depth = v.h;
+		depth = w.h;
         for(int j=0;j<7;j++){
             Pattern vecs[4];
             Exp(w,j,vecs);
             for(int i=0; i<4; i++){
             	Pattern v = vecs[i];
-			//	print(v);
+//				print(v);
                 char value=bd[LU[v.pat[0][0]][v.pat[0][1]]][LU[v.pat[1][0]][v.pat[1][1]]]
                 [LU[v.pat[2][0]][v.pat[2][1]]][LU[v.pat[3][0]][v.pat[3][1]]]
                 [LU[v.pat[4][0]][v.pat[4][1]]][LU[v.pat[5][0]][v.pat[5][1]]]
@@ -255,9 +255,23 @@ short hR(){
 	}
 }
 */
-short heuristica(State s){
+short heuristica(State s, char * p1, char * p2){
 
-  return 0;
+    char v11, v12, w21, w22, h1, h2;
+    v11 = p11[p1[0][0]][p1[0][1]][p1[0][2]][p1[0][3]][p1[0][4]][p1[0][5]][p1[0][6]];
+    v12 = p12[p2[1][0]][p1[1][1]][p1[1][2]][p1[1][3]][p1[1][4]][p1[1][5]][p1[1][6]];
+
+    h1 = v11+v12+p13[p1[2]];
+
+    w21 = p21[p2[0][0]][p2[0][1]][p2[0][2]][p2[0][3]][p2[0][4]][p2[0][5]][p2[0][6]];
+
+    w22 = p22[p2[1][0]][p2[1][1]][p2[1][2]][p2[1][3]][p2[1][4]][p2[1][5]][p2[1][6]];
+
+    h1 = w21+w22+p13[p2[2]];
+
+    if(h1<=h2) return h2;
+
+    return h1;
 
 }
 /*
@@ -367,45 +381,49 @@ int main(){
 	memset(p21, 0, 16*16*16*16*16*16*8);
 	memset(p22, 0, 16*16*16*16*16*16*8);
 	memset(p23, 0, 16);
-	int pasos;
+	int prof;
 	clock_t begin,end;
 	board = sboard();
 	imprimir(board);
 	Pattern p1[2],p2[2];
 	inipat(	board,pm1,p1);
+    //printf("hola\n");
 
 	//p11
 	nodosVis=0;
 	print(p1[0]);
 	begin=clock();
-	bfs(p1[0], p11);
+	prof = bfs(p1[0], p11);
 	end=clock();
-	printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+	printf("vis %ld prof %d time %f\n\n",nodosVis,prof,((double)(end-begin))/CLOCKS_PER_SEC);
 
 	//p12
 	nodosVis=0;
 	print(p1[1]);
 	begin=clock();
-	bfs(p1[1], p12);
+	prof = bfs(p1[1], p12);
 	end=clock();
-	printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+	printf("vis %ld prof %d time %f\n\n",nodosVis,prof,((double)(end-begin))/CLOCKS_PER_SEC);
 
 	inipat(	board,pm2,p2);
-	//p11
+	//p21
 	nodosVis=0;
 	print(p2[0]);
 	begin=clock();
-	bfs(p2[0], p11);
+	prof = bfs(p2[0], p21);
 	end=clock();
-	printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+	printf("vis %ld prof %d time %f\n\n",nodosVis,prof,((double)(end-begin))/CLOCKS_PER_SEC);
 
-	//p12
+	//p22
 	nodosVis=0;
 	print(p2[1]);
 	begin=clock();
-	bfs(p2[1], p12);
+	prof = bfs(p2[1], p22);
 	end=clock();
-	printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+	printf("vis %ld prof %d time %f\n\n",nodosVis,prof,((double)(end-begin))/CLOCKS_PER_SEC);
 
+    //algo de la bd1
+    printf("p11 2 15 6 4 3 9 11 %d\n",p11[2][15][6][4][3][9][11]);
+    
 	//p22
 }

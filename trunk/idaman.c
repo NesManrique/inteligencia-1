@@ -204,7 +204,7 @@ int solve(State s){
 		printf("%d ",cl);
         int ret = dfs(0,cl,&ok,'i');
         if(ok) return ret;
-		if(ret>3000) return -1;
+		if(ret>100) return -1;
         cl = ret;
     }
 }
