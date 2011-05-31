@@ -64,6 +64,10 @@ void Exp(Pattern pi,int n,Pattern p[4]){
             memcpy(p[1].pat,pi.pat,sizeof(char)*16);
             memcpy(p[2].pat,pi.pat,sizeof(char)*16);
             memcpy(p[3].pat,pi.pat,sizeof(char)*16);
+			p[0].h=120;
+			p[1].h=120;
+			p[2].h=120;
+			p[3].h=120;
     if(p[0].pat[n][0]>0){
         for(i=0; i<n; i++){
             if(p[0].pat[i][0]==p[0].pat[n][0] && p[0].pat[i][1]==p[0].pat[n][1]){
@@ -126,8 +130,10 @@ short bfs(Pattern v,char bd[16][16][16][16][16][16][8]){
     //meter v en las bd;
     while(!q.empty()){
 		nodosVis++;
+		i++;
         Pattern w = q.front();
 		q.pop();
+		if(i==10000){printf("%d\n",w.h);i=0;}
         for(int j=0;j<7;j++){
             Pattern vecs[4];
             Exp(w,j,vecs);
