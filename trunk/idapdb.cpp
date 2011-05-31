@@ -10,12 +10,11 @@ typedef struct pattern{
 
 State board;
 char LU[4][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11},{12,13,14,15}};
-short lookup[2][2]; 
 
 char p11 [16][16][16][16][16][16][8];
 char p12 [16][16][16][16][16][16][8];
 char p13 [16];
-char pm1 [15][2];
+char pm1 [15][2] = {{2,0},{0,0},{0,1},{0,2},{0,3},{0,4},{0,5},{0,6},{1,0},{1,1},{1,2},{1,3},{1,4},{1,5},{1,6}};
 
 char p21 [16][16][16][16][16][16][8];
 char p22 [16][16][16][16][16][16][8];
@@ -24,18 +23,18 @@ char pm2 [15][2];
 
 long nodosVis;
 
-bool operator< (Pattern a, Pattern b){
+/*bool operator< (Pattern a, Pattern b){
     if(a.h >= b.h) return true;
 
     return false;
 }
-
+*/
 void inipat(State s, char pm[15][2],Pattern p[2]){
 
     int i,j;
     for(i=0; i<4; i++){
         for(j=0; j<4; j++){
-            int num = getPos(s,i,j);
+            int num = getPos(s,i,j)-1;
             if(pm[num][0]==0) {
             	p[0].pat[pm[num][1]][0]=i;
             	p[0].pat[pm[num][1]][1]=j;
@@ -52,9 +51,19 @@ void inipat(State s, char pm[15][2],Pattern p[2]){
 
 }
 
+void print(Pattern p){
+	for(int i=0;i<7;i++){
+		printf("(%d %d)\n",p.pat[i][0],p.pat[i][1]);
+	}
+	printf("\n");
+}
 void Exp(Pattern pi,int n,Pattern p[4]){
 
     int i,t=1;
+            memcpy(p[0].pat,pi.pat,sizeof(char)*16);
+            memcpy(p[1].pat,pi.pat,sizeof(char)*16);
+            memcpy(p[2].pat,pi.pat,sizeof(char)*16);
+            memcpy(p[3].pat,pi.pat,sizeof(char)*16);
     if(p[0].pat[n][0]>0){
         for(i=0; i<n; i++){
             if(p[0].pat[i][0]==p[0].pat[n][0] && p[0].pat[i][1]==p[0].pat[n][1]){
@@ -63,7 +72,6 @@ void Exp(Pattern pi,int n,Pattern p[4]){
             }
         }
         if(t){
-            memcpy(p[0].pat,pi.pat,sizeof(char)*16);
             p[0].h = pi.h+1;
             p[0].pat[n][0]--;
         }
@@ -77,7 +85,6 @@ void Exp(Pattern pi,int n,Pattern p[4]){
             }
         }
         if(t){
-            memcpy(p[1].pat,pi.pat,sizeof(char)*16);
             p[1].h = pi.h+1;
             p[1].pat[n][0]++;
         }
@@ -91,7 +98,6 @@ void Exp(Pattern pi,int n,Pattern p[4]){
             }
         }
         if(t){
-            memcpy(p[2].pat,pi.pat,sizeof(char)*16);
             p[2].h = pi.h+1;
             p[2].pat[n][1]++;
         }
@@ -105,7 +111,6 @@ void Exp(Pattern pi,int n,Pattern p[4]){
             }
         }
         if(t){
-            memcpy(p[3].pat,pi.pat,sizeof(char)*16);
             p[3].pat[n][1]--;
             p[3].h = pi.h+1;
         }
@@ -113,34 +118,38 @@ void Exp(Pattern pi,int n,Pattern p[4]){
 
 }
 
-short bfs(Pattern v,char* bd){
+short bfs(Pattern v,char bd[16][16][16][16][16][16][8]){
 
     queue<Pattern> q;
     q.push(v);
+	int i = 0;
     //meter v en las bd;
     while(!q.empty()){
-        Pattern w = q.pop();
+		nodosVis++;
+        Pattern w = q.front();
+		q.pop();
         for(int j=0;j<7;j++){
             Pattern vecs[4];
             Exp(w,j,vecs);
             for(int i=0; i<4; i++){
             	Pattern v = vecs[i];
+			//	print(v);
                 char value=bd[LU[v.pat[0][0]][v.pat[0][1]]][LU[v.pat[1][0]][v.pat[1][1]]]
                 [LU[v.pat[2][0]][v.pat[2][1]]][LU[v.pat[3][0]][v.pat[3][1]]]
                 [LU[v.pat[4][0]][v.pat[4][1]]][LU[v.pat[5][0]][v.pat[5][1]]]
-                [LU[v.pat[6][0]][v.pat[6][1]]][LU[v.pat[7][0]][v.pat[7][1]]];
-                if(value!=0){
+                [LU[v.pat[6][0]][v.pat[6][1]]/2];
+                if(value==0 || v.h<value){	
                     bd[LU[v.pat[0][0]][v.pat[0][1]]][LU[v.pat[1][0]][v.pat[1][1]]]
                     [LU[v.pat[2][0]][v.pat[2][1]]][LU[v.pat[3][0]][v.pat[3][1]]]
                     [LU[v.pat[4][0]][v.pat[4][1]]][LU[v.pat[5][0]][v.pat[5][1]]]
-                    [LU[v.pat[6][0]][v.pat[6][1]]][LU[v.pat[7][0]][v.pat[7][1]]]=v.h;
+                    [LU[v.pat[6][0]][v.pat[6][1]]/2]=v.h;
                     q.push(v);
                 }
             }
         }
     }
 }
-
+/*
 void expU(){
 	short wx,wy,h;
 	wx=getWhiteX(board);
@@ -237,13 +246,13 @@ short hR(){
 		return h-1;
 	}
 }
-
+*/
 short heuristica(State s){
 
-    
+  return 0;
 
 }
-
+/*
 char dirs[4]={'d','l','r','u'};
 int dfs(int sc, int cl, char* ok, char dir){
 	nodosVis++;
@@ -341,7 +350,7 @@ int solve(State s){
         cl = ret;
     }
 }
-
+*/
 int main(){
 
     memset(p11, 0, 16*16*16*16*16*16*8);
@@ -352,14 +361,25 @@ int main(){
     memset(p23, 0, 16);
 	int pasos;
 	clock_t begin,end;
-	while(1){
+//	while(1){
 	    board = sboard();
-	    nodosVis=0;
 	    imprimir(board);
+		Pattern p[2];
+		inipat(	board,pm1,p);
+	    nodosVis=0;
+		print(p[0]);
 	    begin=clock();
-	    pasos=solve(board);
+		bfs(p[0], p11);
+//	    pasos=solve(board);
 	    end=clock();
 	    printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
-	}
+	    nodosVis=0;
+		print(p[1]);
+	    begin=clock();
+		bfs(p[1], p11);
+//	    pasos=solve(board);
+	    end=clock();
+	    printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+//	}
 
 }
