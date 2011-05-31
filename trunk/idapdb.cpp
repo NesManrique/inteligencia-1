@@ -9,17 +9,17 @@ typedef struct pattern{
 } Pattern;
 
 State board;
-char LU[4][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11},{12,13,14,15}};
+const char LU[4][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11},{12,13,14,15}};
 
 char p11 [16][16][16][16][16][16][8];
 char p12 [16][16][16][16][16][16][8];
 char p13 [16];
-char pm1 [15][2] = {{2,0},{0,0},{0,1},{0,2},{0,3},{0,4},{0,5},{0,6},{1,0},{1,1},{1,2},{1,3},{1,4},{1,5},{1,6}};
+const char pm1 [15][2] = {{2,0},{0,0},{0,1},{0,2},{0,3},{0,4},{0,5},{0,6},{1,0},{1,1},{1,2},{1,3},{1,4},{1,5},{1,6}};
 
 char p21 [16][16][16][16][16][16][8];
 char p22 [16][16][16][16][16][16][8];
 char p23 [16];
-char pm2 [15][2];
+const char pm2 [15][2] = {{2,0},{1,0},{1,1},{0,0},{0,1},{1,2},{1,3},{0,2},{0,3},{1,4},{1,5},{0,4},{0,5},{0,6},{1,6}} ;
 
 long nodosVis;
 
@@ -29,7 +29,7 @@ long nodosVis;
     return false;
 }
 */
-void inipat(State s, char pm[15][2],Pattern p[2]){
+void inipat(State s,const char pm[15][2],Pattern p[2]){
 
     int i,j;
     for(i=0; i<4; i++){
@@ -59,81 +59,82 @@ void print(Pattern p){
 }
 void Exp(Pattern pi,int n,Pattern p[4]){
 
-    int i,t=1;
-            memcpy(p[0].pat,pi.pat,sizeof(char)*16);
-            memcpy(p[1].pat,pi.pat,sizeof(char)*16);
-            memcpy(p[2].pat,pi.pat,sizeof(char)*16);
-            memcpy(p[3].pat,pi.pat,sizeof(char)*16);
-			p[0].h=120;
-			p[1].h=120;
-			p[2].h=120;
-			p[3].h=120;
-    if(p[0].pat[n][0]>0){
-        for(i=0; i<n; i++){
-            if(p[0].pat[i][0]==p[0].pat[n][0] && p[0].pat[i][1]==p[0].pat[n][1]){
-            	t=0;
-                break;
-            }
-        }
-        if(t){
-            p[0].h = pi.h+1;
-            p[0].pat[n][0]--;
-        }
-    }
-    t=1;
-    if(p[1].pat[n][0]<3){
-        for(i=0; i<n; i++){
-            if(p[1].pat[i][0]==p[1].pat[n][0] && p[1].pat[i][1]==p[1].pat[n][1]){
-                t=0;
-                    break;
-            }
-        }
-        if(t){
-            p[1].h = pi.h+1;
-            p[1].pat[n][0]++;
-        }
-    }
-    t=1;
-    if(p[2].pat[n][1]<3){
-        for(i=0; i<n; i++){
-            if(p[2].pat[i][0]==p[2].pat[n][0] && p[2].pat[i][1]==p[2].pat[n][1]){
-                t=0;
-                break;
-            }
-        }
-        if(t){
-            p[2].h = pi.h+1;
-            p[2].pat[n][1]++;
-        }
-    }
-    t=1;
-    if(p[3].pat[n][1]>0){
-        for(i=0; i<n; i++){
-            if(p[3].pat[i][0]==p[3].pat[n][0] && p[3].pat[i][1]==p[3].pat[n][1]){
-                t=0;
-                break;
-            }
-        }
-        if(t){
-            p[3].pat[n][1]--;
-            p[3].h = pi.h+1;
-        }
-    }
+	int i,t=1;
+	memcpy(p[0].pat,pi.pat,sizeof(char)*16);
+	memcpy(p[1].pat,pi.pat,sizeof(char)*16);
+	memcpy(p[2].pat,pi.pat,sizeof(char)*16);
+	memcpy(p[3].pat,pi.pat,sizeof(char)*16);
+	p[0].h=120;
+	p[1].h=120;
+	p[2].h=120;
+	p[3].h=120;
+	if(p[0].pat[n][0]>0){
+		for(i=0; i<n; i++){
+			if(p[0].pat[i][0]==p[0].pat[n][0] && p[0].pat[i][1]==p[0].pat[n][1]){
+				t=0;
+				break;
+			}
+		}
+		if(t){
+			p[0].h = pi.h+1;
+			p[0].pat[n][0]--;
+		}
+	}
+	t=1;
+	if(p[1].pat[n][0]<3){
+		for(i=0; i<n; i++){
+			if(p[1].pat[i][0]==p[1].pat[n][0] && p[1].pat[i][1]==p[1].pat[n][1]){
+				t=0;
+				break;
+			}
+		}
+		if(t){
+			p[1].h = pi.h+1;
+			p[1].pat[n][0]++;
+		}
+	}
+	t=1;
+	if(p[2].pat[n][1]<3){
+		for(i=0; i<n; i++){
+			if(p[2].pat[i][0]==p[2].pat[n][0] && p[2].pat[i][1]==p[2].pat[n][1]){
+				t=0;
+				break;
+			}
+		}
+		if(t){
+			p[2].h = pi.h+1;
+			p[2].pat[n][1]++;
+		}
+	}
+	t=1;
+	if(p[3].pat[n][1]>0){
+		for(i=0; i<n; i++){
+			if(p[3].pat[i][0]==p[3].pat[n][0] && p[3].pat[i][1]==p[3].pat[n][1]){
+				t=0;
+				break;
+			}
+		}
+		if(t){
+			p[3].pat[n][1]--;
+			p[3].h = pi.h+1;
+		}
+	}
 
 }
 
-short bfs(Pattern v,char bd[16][16][16][16][16][16][8]){
+int bfs(Pattern v,char bd[16][16][16][16][16][16][8]){
 
     queue<Pattern> q;
     q.push(v);
-	int i = 0;
+	int i = 0,depth;
     //meter v en las bd;
     while(!q.empty()){
 		nodosVis++;
 		i++;
         Pattern w = q.front();
 		q.pop();
-		if(i==10000){printf("%d\n",w.h);i=0;}
+//		if(i>1000000){printf("%ld\n",nodosVis);i=0;}
+		depth = v.h;
         for(int j=0;j<7;j++){
             Pattern vecs[4];
             Exp(w,j,vecs);
@@ -154,6 +155,7 @@ short bfs(Pattern v,char bd[16][16][16][16][16][16][8]){
             }
         }
     }
+	return depth;
 }
 /*
 void expU(){
@@ -359,33 +361,51 @@ int solve(State s){
 */
 int main(){
 
-    memset(p11, 0, 16*16*16*16*16*16*8);
-    memset(p12, 0, 16*16*16*16*16*16*8);
-    memset(p13, 0, 16);
-    memset(p21, 0, 16*16*16*16*16*16*8);
-    memset(p22, 0, 16*16*16*16*16*16*8);
-    memset(p23, 0, 16);
+	memset(p11, 0, 16*16*16*16*16*16*8);
+	memset(p12, 0, 16*16*16*16*16*16*8);
+	memset(p13, 0, 16);
+	memset(p21, 0, 16*16*16*16*16*16*8);
+	memset(p22, 0, 16*16*16*16*16*16*8);
+	memset(p23, 0, 16);
 	int pasos;
 	clock_t begin,end;
-//	while(1){
-	    board = sboard();
-	    imprimir(board);
-		Pattern p[2];
-		inipat(	board,pm1,p);
-	    nodosVis=0;
-		print(p[0]);
-	    begin=clock();
-		bfs(p[0], p11);
-//	    pasos=solve(board);
-	    end=clock();
-	    printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
-	    nodosVis=0;
-		print(p[1]);
-	    begin=clock();
-		bfs(p[1], p11);
-//	    pasos=solve(board);
-	    end=clock();
-	    printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
-//	}
+	board = sboard();
+	imprimir(board);
+	Pattern p1[2],p2[2];
+	inipat(	board,pm1,p1);
 
+	//p11
+	nodosVis=0;
+	print(p1[0]);
+	begin=clock();
+	bfs(p1[0], p11);
+	end=clock();
+	printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+
+	//p12
+	nodosVis=0;
+	print(p1[1]);
+	begin=clock();
+	bfs(p1[1], p12);
+	end=clock();
+	printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+
+	inipat(	board,pm2,p2);
+	//p11
+	nodosVis=0;
+	print(p2[0]);
+	begin=clock();
+	bfs(p2[0], p11);
+	end=clock();
+	printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+
+	//p12
+	nodosVis=0;
+	print(p2[1]);
+	begin=clock();
+	bfs(p2[1], p12);
+	end=clock();
+	printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+
+	//p22
 }
