@@ -5,21 +5,26 @@
 typedef struct estado{
     unsigned short tablero [4][4];
     unsigned short white [2];
-    unsigned short h;
+    short h;
 } State;
 
 short Lookup [16][2] ={{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3},{2,0},{2,1},{2,2},{2,3},{3,0},{3,1},{3,2},{3,3}};
 
 /* Funcion que calcula la heuristica */
 short heuristica(State s);
+short heuristica2(int dir[6][7]);
 
 /* Constructor */
 State sboard(){
     State board;
+    board.h = 0;
 	int i,j,n;
 	for(i=0;i<4;i++){
 		for(j=0;j<4;j++){
-			scanf("%d",&n);
+			if(scanf("%d",&n)==EOF) {
+                board.h = -1;
+                return board;
+            }
 			board.tablero[i][j]=n;
 			if(n==0){
 				board.white[0]=i;
@@ -76,11 +81,11 @@ void setWhiteY(State *s, unsigned short y){
     s->white[1] = y;	
 }
 
-unsigned short getH(State s){
+short getH(State s){
 	return s.h;
 }
 
-void setH(State * s, unsigned short h){
+void setH(State * s, short h){
 	s->h = h;
 }
 

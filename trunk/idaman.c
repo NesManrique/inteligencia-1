@@ -213,7 +213,8 @@ int main(){
 	clock_t begin,end;
 	while(1){
 	    board = sboard();
-        setH(&sboard, heuristica(board));
+        if(board.h == -1) break;
+        setH(&board, heuristica(board));
 	    nodosVis=0;
 	    imprimir(board);
 	    begin=clock();
@@ -221,5 +222,7 @@ int main(){
 	    end=clock();
 	    printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
 	}
+    
+    return 0;
 
 }
