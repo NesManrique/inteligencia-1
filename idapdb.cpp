@@ -9,16 +9,17 @@ typedef struct pattern{
 } Pattern;
 
 State board;
+
 const char LU[4][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11},{12,13,14,15}};
 
 char p11 [16][16][16][16][16][16][8];
 char p12 [16][16][16][16][16][16][8];
-char p13 [16];
-const char pm1 [15][2] = {{2,0},{0,0},{0,1},{0,2},{0,3},{0,4},{0,5},{0,6},{1,0},{1,1},{1,2},{1,3},{1,4},{1,5},{1,6}};
+char p13 [16] = {1,0,1,2,2,1,2,3,3,2,3,4,4,3,4,5};
+const char pm1 [15][2] = {{2,0},{0,0},{1,0},{0,1},{0,2},{0,3},{1,1},{0,4},{0,5},{0,6},{1,2},{1,3},{1,4},{1,5},{1,6}};
 
 char p21 [16][16][16][16][16][16][8];
 char p22 [16][16][16][16][16][16][8];
-char p23 [16];
+char p23 [16] = {1,0,1,2,2,1,2,3,3,2,3,4,4,3,4,5};
 const char pm2 [15][2] = {{2,0},{1,0},{1,1},{0,0},{0,1},{1,2},{1,3},{0,2},{0,3},{1,4},{1,5},{0,4},{0,5},{0,6},{1,6}};
 
 long nodosVis;
@@ -29,6 +30,21 @@ long nodosVis;
     return false;
 }
 */
+
+void abstractf(State s, int dir[6][7]){
+
+    int i, j, k;
+    for(i = 0; i < 4; i++){
+        for(j = 0; j < 4; j++){
+            k = getPos(s, i, j);
+            if(!k) continue;
+            dir[pm1[k][0]][pm1[k][1]] = LU[i][j];
+            dir[pm2[k][0]+3][pm2[k][1]]= LU[i][j];
+        }
+    }
+
+}
+
 void inipat(State s,const char pm[15][2],Pattern p[2]){
 
     int i,j;
@@ -58,7 +74,6 @@ void print(Pattern p){
 	printf("\n");
 }
 void Exp(Pattern pi,int n,Pattern p[4]){
-
 	int i,t=1;
 	memcpy(p[0].pat,pi.pat,sizeof(char)*16);
 	memcpy(p[1].pat,pi.pat,sizeof(char)*16);
@@ -157,191 +172,100 @@ int bfs(Pattern v,char bd[16][16][16][16][16][16][8]){
     }
 	return depth;
 }
-/*
+
 void expU(){
-	short wx,wy,h;
-	wx=getWhiteX(board);
-	wy=getWhiteY(board);
-	h=getH(board);
-	if(lookup[getPos(board,wx-1,wy)][0] < wx){
-		setH(&board,h+1);
-	}else{
-		setH(&board,h-1);
-	}
+    int dir[6][7];
 	moveU(&board);
+    abstratcf(board, dir);
+    setH(&board, heuristica(dir));
 }
 
 void expD(){
-	short wx,wy,h;
-	wx=getWhiteX(board);
-	wy=getWhiteY(board);
-	h=getH(board);
-	if(lookup[getPos(board,wx+1,wy)][0] > wx){
-		setH(&board,h+1);
-	}else{
-		setH(&board,h-1);
-	}
-	moveD(&board);
+	int dir[6][7];
+	moveU(&board);
+    abstratcf(board, dir);
+    setH(&board, heuristica(dir));
 }
 void expL(){
-	short wx,wy,h;
-	wx=getWhiteX(board);
-	wy=getWhiteY(board);
-	h=getH(board);
-	if(lookup[getPos(board,wx,wy-1)][1] < wy){
-		setH(&board,h+1);
-	}else{
-		setH(&board,h-1);
-	}
-	moveL(&board);
+	int dir[6][7];
+	moveU(&board);
+    abstratcf(board, dir);
+    setH(&board, heuristica(dir));
 }
 void expR(){
-	short wx,wy,h;
-	wx=getWhiteX(board);
-	wy=getWhiteY(board);
-	h=getH(board);
-	if(lookup[getPos(board,wx,wy+1)][1] > wy){
-		setH(&board,h+1);
-	}else{
-		setH(&board,h-1);
-	}
-	moveR(&board);
+	int dir[6][7];
+	moveU(&board);
+    abstratcf(board, dir);
+    setH(&board, heuristica(dir));
 }
 
-short hU(){
-	short wx,wy,h;
-	wx=getWhiteX(board);
-	wy=getWhiteY(board);
-	h=getH(board);
-	if(lookup[getPos(board,wx-1,wy)][0] < wx){
-	    return h+1;
-	}else{
-		return h-1;
-	}
-}
-
-short hD(){
-	short wx,wy,h;
-	wx=getWhiteX(board);
-	wy=getWhiteY(board);
-	h=getH(board);
-	if(lookup[getPos(board,wx+1,wy)][0] > wx){
-	    return h+1;
-	}else{
-		return h-1;
-	}
-}
-
-short hL(){
-	short wx,wy,h;
-	wx=getWhiteX(board);
-	wy=getWhiteY(board);
-	h=getH(board);
-	if(lookup[getPos(board,wx,wy-1)][1] < wy){
-        return h+1;
-	}else{
-		return h-1;
-	}
-}
-short hR(){
-	short wx,wy,h;
-	wx=getWhiteX(board);
-	wy=getWhiteY(board);
-	h=getH(board);
-	if(lookup[getPos(board,wx,wy+1)][1] > wy){
-		return h+1;
-	}else{
-		return h-1;
-	}
-}
-*/
-short heuristica(State s, char * p1, char * p2){
+short heuristica(int dir[6][7]){
 
     char v11, v12, w21, w22, h1, h2;
-    v11 = p11[p1[0][0]][p1[0][1]][p1[0][2]][p1[0][3]][p1[0][4]][p1[0][5]][p1[0][6]];
-    v12 = p12[p2[1][0]][p1[1][1]][p1[1][2]][p1[1][3]][p1[1][4]][p1[1][5]][p1[1][6]];
+    v11 = p11[dir[0][0]][dir[0][1]][dir[0][2]][dir[0][3]][dir[0][4]][dir[0][5]][dir[0][6]];
+    v12 = p12[dir[1][0]][dir[1][1]][dir[1][2]][dir[1][3]][dir[1][4]][dir[1][5]][dir[1][6]];
+    h1 = v11+v12+p13[dir[2][0]];
 
-    h1 = v11+v12+p13[p1[2]];
-
-    w21 = p21[p2[0][0]][p2[0][1]][p2[0][2]][p2[0][3]][p2[0][4]][p2[0][5]][p2[0][6]];
-
-    w22 = p22[p2[1][0]][p2[1][1]][p2[1][2]][p2[1][3]][p2[1][4]][p2[1][5]][p2[1][6]];
-
-    h1 = w21+w22+p13[p2[2]];
+    w21 = p21[dir[3][0]][dir[3][1]][dir[3][2]][dir[3][3]][dir[3][4]][dir[3][5]][dir[3][6]];
+    w22 = p22[dir[4][0]][dir[4][1]][dir[4][2]][dir[4][3]][dir[4][4]][dir[4][5]][dir[4][6]];
+    h2 = w21+w22+p13[dir[5][0]];
 
     if(h1<=h2) return h2;
 
     return h1;
 
 }
-/*
+
 char dirs[4]={'d','l','r','u'};
 int dfs(int sc, int cl, char* ok, char dir){
 	nodosVis++;
     short curnth = getH(board);
     short cm = sc + curnth;
     if(cm > cl) return cm;
-    if(isGoal(board)){
+    if(curnth == 0){
 		*ok = 1;
 		return sc;
 	}
 
     int ncl = 32767;
     short i, j;
-    short ord[4] = {0,1,2,3}; 
-    short hord[4] = {200, 200, 200, 200};
-
-    if(wx <= 0) hord[0] = hD();
-	if(wy >= 3) hord[1] = hL();
-	if(wy <= 0) hord[2] = hR();
-	if(wx >= 3) hord[3] = hU();
-
-    for(i=0, j=3; i>=j;){
-        if(hord[i]>curnth){
-            short temp = hord[i];
-            hord[i] = hord[j];
-            hord[j] = temp;
-            temp = ord[i];
-            ord[i] = ord[j];
-            ord[j] = temp;
-            j--;
-        }else{
-            i++;
-        }
-    }
 
     int ret;
 	short wx,wy,d;
 	wx = getWhiteX(board);
 	wy = getWhiteY(board);
+    char t;
     for(i=0;i<4;i++){
-        d = ord[i];
-		State succ;
+        if(dir == dirs[i]) continue;
 		//moviendo
 		switch(d){
 			case 0:
-				if(wx <= 0 || dir==dirs[d]) continue;
+				if(wx <= 0) continue;
 				expU(board);
+                t = 'u';
 				break;
 			case 1:
-				if(wy >= 3 || dir==dirs[d]) continue;
+				if(wy >= 3) continue;
 				expR(board);
+                t = 'r';
 				break;
 			case 2:
-				if(wy <=0 || dir==dirs[d]) continue;
+				if(wy <= 0) continue;
 				expL(board);
+                t = 'l';
 				break;
 			case 3:
-				if(wx >= 3 || dir==dirs[d]) continue;
+				if(wx >= 3) continue;
 				expD(board);
+                t = 'd';
 				break;
 		}
 		//imprimir(succ);
-        ret = dfs(sc+1, cl, ok,dirs[3-d]);
+        ret = dfs(sc+1, cl, ok, t);
         if(*ok) return ret;
         if(ncl > ret) ncl = ret;
 		//regresando el movimiento
-		switch(d){
+		switch(i){
 			case 0:
 				expD(board);
 				break;
@@ -372,7 +296,7 @@ int solve(State s){
         cl = ret;
     }
 }
-*/
+
 int main(){
 
 	memset(p11, 0, 16*16*16*16*16*16*8);
@@ -383,7 +307,8 @@ int main(){
 	memset(p23, 0, 16);
 	int prof;
 	clock_t begin,end;
-	board = sboard();
+    int arr[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}
+	board = sboard2(arr);
 	imprimir(board);
 	Pattern p1[2],p2[2];
 	inipat(	board,pm1,p1);
@@ -423,7 +348,21 @@ int main(){
 	printf("vis %ld prof %d time %f\n\n",nodosVis,prof,((double)(end-begin))/CLOCKS_PER_SEC);
 
     //algo de la bd1
-    printf("p11 2 15 6 4 3 9 11 %d\n",p11[2][15][6][4][3][9][11]);
+    //printf("p11 2 15 6 4 3 9 11 %d\n",p11[2][15][6][4][3][9][11]);
+
+    while(1){
+
+        board = sboard();
+        abstratcf(board, dir);
+        setH(&board, heuristica(dir));
+	    nodosVis=0;
+	    imprimir(board);
+	    begin=clock();
+	    pasos=solve(board);
+	    end=clock();
+	    printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+
+    }
     
 	//p22
 }

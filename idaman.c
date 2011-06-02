@@ -136,7 +136,6 @@ void inversemov(short d){
 		}
 }
 
-
 char dirs[4]={'d','l','u','r'};
 int dfs(int sc, int cl, char* ok, char dir){
 	nodosVis++;
@@ -214,6 +213,7 @@ int main(){
 	clock_t begin,end;
 	while(1){
 	    board = sboard();
+        setH(&sboard, heuristica(board));
 	    nodosVis=0;
 	    imprimir(board);
 	    begin=clock();
