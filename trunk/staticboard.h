@@ -8,6 +8,8 @@ typedef struct estado{
     unsigned short h;
 } State;
 
+short Lookup [16][2] ={{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3},{2,0},{2,1},{2,2},{2,3},{3,0},{3,1},{3,2},{3,3}};
+
 /* Funcion que calcula la heuristica */
 short heuristica(State s);
 
@@ -26,10 +28,29 @@ State sboard(){
 		}
 	}
   
-    board.h = heuristica(board);
+    //board.h = heuristica(board);
 
     return board;
 }
+
+/* Constructor a partir de arreglo*/
+State sboard2(int arr[]){
+    State board;
+	int i;
+
+    for(i=0; i<16; i++){
+        board.tablero[Lookup[i][0]][Lookup[i][1]]= arr[i];
+        if(!arr[i]){
+            board.white[0] = Lookup[i][0];
+            board.white[1] = Lookup[i][1];
+        }
+    }	
+  
+    //board.h = heuristica(board);
+
+    return board;
+}
+
 
 short getPos(State s, short x, short y){
     return s.tablero[x][y];

@@ -1,10 +1,9 @@
 
+all: idaman idapdb
 
-all: ideastar ida
+idapdb: staticboard.h idapdb.cpp
+	g++ idapdb.cpp staticboard.h -O3 -o idapdb
 
-ideastar: aestrella.h aestrella.cpp
-	g++ aestrella.cpp aestrella.h -o idas -O3
-
-ida: idaman.c staticboard.h
-	gcc idaman.c staticboard -O3 -o ida
+idaman: idaman.c staticboard.h
+	gcc idaman.c staticboard.h -O3 -o idaman
 
