@@ -37,9 +37,10 @@ void abstractf(State s, int dir[6][7]){
     for(i = 0; i < 4; i++){
         for(j = 0; j < 4; j++){
             k = getPos(s, i, j);
-            if(!k) continue;
-            dir[pm1[k][0]][pm1[k][1]] = LU[i][j];
-            dir[pm2[k][0]+3][pm2[k][1]]= LU[i][j];
+            if(k==0) continue;
+            dir[pm1[k-1][0]][pm1[k-1][1]] = LU[i][j];
+            dir[pm2[k-1][0]+3][pm2[k-1][1]]= LU[i][j];
+           //printf("k %d LU %d\n", k, LU[i][j]);
         }
     }
 
@@ -176,30 +177,30 @@ int bfs(Pattern v,char bd[16][16][16][16][16][16][8]){
 void expU(){
     int dir[6][7];
 	moveU(&board);
-    abstratcf(board, dir);
-    setH(&board, heuristica(dir));
+    abstractf(board, dir);
+    setH(&board, heuristica2(dir));
 }
 
 void expD(){
 	int dir[6][7];
-	moveU(&board);
-    abstratcf(board, dir);
-    setH(&board, heuristica(dir));
+	moveD(&board);
+    abstractf(board, dir);
+    setH(&board, heuristica2(dir));
 }
 void expL(){
 	int dir[6][7];
-	moveU(&board);
-    abstratcf(board, dir);
-    setH(&board, heuristica(dir));
+	moveL(&board);
+    abstractf(board, dir);
+    setH(&board, heuristica2(dir));
 }
 void expR(){
 	int dir[6][7];
-	moveU(&board);
-    abstratcf(board, dir);
-    setH(&board, heuristica(dir));
+	moveR(&board);
+    abstractf(board, dir);
+    setH(&board, heuristica2(dir));
 }
 
-short heuristica(int dir[6][7]){
+short heuristica2(int dir[6][7]){
 
     char v11, v12, w21, w22, h1, h2;
     v11 = p11[dir[0][0]][dir[0][1]][dir[0][2]][dir[0][3]][dir[0][4]][dir[0][5]][dir[0][6]];
@@ -228,35 +229,35 @@ int dfs(int sc, int cl, char* ok, char dir){
 	}
 
     int ncl = 32767;
-    short i, j;
+    short i;
 
     int ret;
-	short wx,wy,d;
+	short wx,wy;
 	wx = getWhiteX(board);
 	wy = getWhiteY(board);
     char t;
     for(i=0;i<4;i++){
         if(dir == dirs[i]) continue;
 		//moviendo
-		switch(d){
+		switch(i){
 			case 0:
 				if(wx <= 0) continue;
-				expU(board);
+				expU();
                 t = 'u';
 				break;
 			case 1:
 				if(wy >= 3) continue;
-				expR(board);
+				expR();
                 t = 'r';
 				break;
 			case 2:
 				if(wy <= 0) continue;
-				expL(board);
+				expL();
                 t = 'l';
 				break;
 			case 3:
 				if(wx >= 3) continue;
-				expD(board);
+				expD();
                 t = 'd';
 				break;
 		}
@@ -267,16 +268,16 @@ int dfs(int sc, int cl, char* ok, char dir){
 		//regresando el movimiento
 		switch(i){
 			case 0:
-				expD(board);
+				expD();
 				break;
 			case 1:
-				expL(board);
+				expL();
 				break;
 			case 2:
-				expR(board);
+				expR();
 				break;
 			case 3:
-				expU(board);
+				expU();
 				break;
 		}
 	} 
@@ -307,7 +308,8 @@ int main(){
 	memset(p23, 0, 16);
 	int prof;
 	clock_t begin,end;
-    int arr[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}
+    int arr[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+    int dir[6][7];
 	board = sboard2(arr);
 	imprimir(board);
 	Pattern p1[2],p2[2];
@@ -353,16 +355,17 @@ int main(){
     while(1){
 
         board = sboard();
-        abstratcf(board, dir);
-        setH(&board, heuristica(dir));
+        if(board.h == -1) break;
+        abstractf(board, dir);
+        setH(&board, heuristica2(dir));
 	    nodosVis=0;
 	    imprimir(board);
 	    begin=clock();
-	    pasos=solve(board);
+	    prof=solve(board);
 	    end=clock();
-	    printf("%ld %d %f\n\n",nodosVis,pasos,((double)(end-begin))/CLOCKS_PER_SEC);
+	    printf("%ld %d %f\n\n",nodosVis,prof,((double)(end-begin))/CLOCKS_PER_SEC);
 
     }
-    
-	//p22
+   
+    return 0; 
 }

@@ -7,3 +7,6 @@ idapdb: staticboard.h idapdb.cpp
 idaman: idaman.c staticboard.h
 	gcc idaman.c staticboard.h -O3 -o idaman
 
+clean: 
+	rm idaman idapdb
+	
