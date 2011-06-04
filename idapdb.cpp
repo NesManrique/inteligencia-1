@@ -12,13 +12,13 @@ State board;
 
 const char LU[4][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11},{12,13,14,15}};
 
-char p11 [16][16][16][16][16][16][8];
-char p12 [16][16][16][16][16][16][8];
+char p11 [16][16][16][16][16][16][16];
+char p12 [16][16][16][16][16][16][16];
 char p13 [16] = {1,0,1,2,2,1,2,3,3,2,3,4,4,3,4,5};
 const char pm1 [15][2] = {{2,0},{0,0},{1,0},{0,1},{0,2},{0,3},{1,1},{0,4},{0,5},{0,6},{1,2},{1,3},{1,4},{1,5},{1,6}};
 
-char p21 [16][16][16][16][16][16][8];
-char p22 [16][16][16][16][16][16][8];
+char p21 [16][16][16][16][16][16][16];
+char p22 [16][16][16][16][16][16][16];
 char p23 [16] = {1,0,1,2,2,1,2,3,3,2,3,4,4,3,4,5};
 const char pm2 [15][2] = {{2,0},{1,0},{1,1},{0,0},{0,1},{1,2},{1,3},{0,2},{0,3},{1,4},{1,5},{0,4},{0,5},{0,6},{1,6}};
 
@@ -72,104 +72,118 @@ void print(Pattern p){
 	for(int i=0;i<7;i++){
 		printf("(%d %d)\n",p.pat[i][0],p.pat[i][1]);
 	}
-	printf("\n");
+    printf("p.h %d\n\n", p.h);
 }
 void Exp(Pattern pi,int n,Pattern p[4]){
 	int i,t=1;
-	memcpy(p[0].pat,pi.pat,sizeof(char)*16);
-	memcpy(p[1].pat,pi.pat,sizeof(char)*16);
-	memcpy(p[2].pat,pi.pat,sizeof(char)*16);
-	memcpy(p[3].pat,pi.pat,sizeof(char)*16);
+	memcpy(p[0].pat,pi.pat,sizeof(char)*14);
+	memcpy(p[1].pat,pi.pat,sizeof(char)*14);
+	memcpy(p[2].pat,pi.pat,sizeof(char)*14);
+	memcpy(p[3].pat,pi.pat,sizeof(char)*14);
 	p[0].h=120;
 	p[1].h=120;
 	p[2].h=120;
 	p[3].h=120;
 	if(p[0].pat[n][0]>0){
-		for(i=0; i<n; i++){
-			if(p[0].pat[i][0]==p[0].pat[n][0] && p[0].pat[i][1]==p[0].pat[n][1]){
+	    p[0].pat[n][0]--;
+		for(i=0; i<7; i++){
+            //if(i==n) continue;
+			if(pi.pat[i][0]==p[0].pat[n][0] && pi.pat[i][1]==p[0].pat[n][1]){
 				t=0;
 				break;
 			}
 		}
 		if(t){
 			p[0].h = pi.h+1;
-			p[0].pat[n][0]--;
 		}
 	}
 	t=1;
 	if(p[1].pat[n][0]<3){
-		for(i=0; i<n; i++){
-			if(p[1].pat[i][0]==p[1].pat[n][0] && p[1].pat[i][1]==p[1].pat[n][1]){
+	    p[1].pat[n][0]++;
+		for(i=0; i<7; i++){
+            //if(i==n) continue;
+			if(pi.pat[i][0]==p[1].pat[n][0] && pi.pat[i][1]==p[1].pat[n][1]){
 				t=0;
 				break;
 			}
 		}
 		if(t){
 			p[1].h = pi.h+1;
-			p[1].pat[n][0]++;
 		}
 	}
 	t=1;
 	if(p[2].pat[n][1]<3){
-		for(i=0; i<n; i++){
-			if(p[2].pat[i][0]==p[2].pat[n][0] && p[2].pat[i][1]==p[2].pat[n][1]){
+		p[2].pat[n][1]++;
+		for(i=0; i<7; i++){
+            //if(i==n) continue;
+			if(pi.pat[i][0]==p[2].pat[n][0] && pi.pat[i][1]==p[2].pat[n][1]){
 				t=0;
 				break;
 			}
 		}
 		if(t){
 			p[2].h = pi.h+1;
-			p[2].pat[n][1]++;
 		}
 	}
 	t=1;
 	if(p[3].pat[n][1]>0){
-		for(i=0; i<n; i++){
-			if(p[3].pat[i][0]==p[3].pat[n][0] && p[3].pat[i][1]==p[3].pat[n][1]){
+	    p[3].pat[n][1]--;
+		for(i=0; i<7; i++){
+            //if(i==n) continue;
+			if(pi.pat[i][0]==p[3].pat[n][0] && pi.pat[i][1]==p[3].pat[n][1]){
 				t=0;
 				break;
 			}
 		}
 		if(t){
-			p[3].pat[n][1]--;
-			p[3].h = pi.h+1;
+		    p[3].h = pi.h+1;
 		}
 	}
 
 }
 
-int bfs(Pattern v,char bd[16][16][16][16][16][16][8]){
+int bfs(Pattern v,char bd[16][16][16][16][16][16][16]){
 
     queue<Pattern> q;
     q.push(v);
-	int i = 0,depth;
+	int z = 0,depth;
+    bd[LU[v.pat[0][0]][v.pat[0][1]]][LU[v.pat[1][0]][v.pat[1][1]]]
+        [LU[v.pat[2][0]][v.pat[2][1]]][LU[v.pat[3][0]][v.pat[3][1]]]
+        [LU[v.pat[4][0]][v.pat[4][1]]][LU[v.pat[5][0]][v.pat[5][1]]]
+        [LU[v.pat[6][0]][v.pat[6][1]]]= v.h;
+    printf("bd[%d][%d][%d][%d][%d][%d][%d] \n", LU[v.pat[0][0]][v.pat[0][1]], LU[v.pat[1][0]][v.pat[1][1]],
+        LU[v.pat[2][0]][v.pat[2][1]],LU[v.pat[3][0]][v.pat[3][1]],
+        LU[v.pat[4][0]][v.pat[4][1]],LU[v.pat[5][0]][v.pat[5][1]],
+        LU[v.pat[6][0]][v.pat[6][1]]);
     //meter v en las bd;
     while(!q.empty()){
 		nodosVis++;
-		i++;
         Pattern w = q.front();
 		q.pop();
-//		if(i>1000000){printf("%ld\n",nodosVis);i=0;}
+        		//if(i>1000000){printf("v.h %d\n",w.h);i=0;}
 		depth = w.h;
         for(int j=0;j<7;j++){
             Pattern vecs[4];
             Exp(w,j,vecs);
             for(int i=0; i<4; i++){
-            	Pattern v = vecs[i];
-//				print(v);
-                char value=bd[LU[v.pat[0][0]][v.pat[0][1]]][LU[v.pat[1][0]][v.pat[1][1]]]
-                [LU[v.pat[2][0]][v.pat[2][1]]][LU[v.pat[3][0]][v.pat[3][1]]]
-                [LU[v.pat[4][0]][v.pat[4][1]]][LU[v.pat[5][0]][v.pat[5][1]]]
-                [LU[v.pat[6][0]][v.pat[6][1]]/2];
-                if(value==0 || v.h<value){	
-                    bd[LU[v.pat[0][0]][v.pat[0][1]]][LU[v.pat[1][0]][v.pat[1][1]]]
-                    [LU[v.pat[2][0]][v.pat[2][1]]][LU[v.pat[3][0]][v.pat[3][1]]]
-                    [LU[v.pat[4][0]][v.pat[4][1]]][LU[v.pat[5][0]][v.pat[5][1]]]
-                    [LU[v.pat[6][0]][v.pat[6][1]]/2]=v.h;
-                    q.push(v);
+            	Pattern vec = vecs[i];
+                //				print(v);
+                char value=bd[LU[vec.pat[0][0]][vec.pat[0][1]]][LU[vec.pat[1][0]][vec.pat[1][1]]]
+                    [LU[vec.pat[2][0]][vec.pat[2][1]]][LU[vec.pat[3][0]][vec.pat[3][1]]]
+                    [LU[vec.pat[4][0]][vec.pat[4][1]]][LU[vec.pat[5][0]][vec.pat[5][1]]]
+                    [LU[vec.pat[6][0]][vec.pat[6][1]]];
+                if(vec.h < value){	
+		            z++;
+                    bd[LU[vec.pat[0][0]][vec.pat[0][1]]][LU[vec.pat[1][0]][vec.pat[1][1]]]
+                        [LU[vec.pat[2][0]][vec.pat[2][1]]][LU[vec.pat[3][0]][vec.pat[3][1]]]
+                        [LU[vec.pat[4][0]][vec.pat[4][1]]][LU[vec.pat[5][0]][vec.pat[5][1]]]
+                        [LU[vec.pat[6][0]][vec.pat[6][1]]]=vec.h;
+                    q.push(vec);
                 }
             }
         }
+        //printf("hijos pusheados %d\n",z);
+        z = 0;
     }
 	return depth;
 }
@@ -210,6 +224,14 @@ short heuristica2(int dir[6][7]){
     w21 = p21[dir[3][0]][dir[3][1]][dir[3][2]][dir[3][3]][dir[3][4]][dir[3][5]][dir[3][6]];
     w22 = p22[dir[4][0]][dir[4][1]][dir[4][2]][dir[4][3]][dir[4][4]][dir[4][5]][dir[4][6]];
     h2 = w21+w22+p13[dir[5][0]];
+
+    /* for(int i=0; i<6; i++){
+        for(int j=0; j<7; j++){
+            printf("dir[%d][%d] = %d\n", i, j, dir[i][j]);
+        }
+    }*/
+
+    //printf("h1 %d h2 %d v11 %d v12 %d w21 %d w22 %d\n", h1, h2, v11, v12, w21, w22);
 
     if(h1<=h2) return h2;
 
@@ -298,27 +320,46 @@ int solve(State s){
     }
 }
 
+int arr[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+
 int main(){
 
-	memset(p11, 0, 16*16*16*16*16*16*8);
-	memset(p12, 0, 16*16*16*16*16*16*8);
-	memset(p13, 0, 16);
-	memset(p21, 0, 16*16*16*16*16*16*8);
-	memset(p22, 0, 16*16*16*16*16*16*8);
-	memset(p23, 0, 16);
+	memset(p11, 100, 16*16*16*16*16*16*16);
+	memset(p12, 100, 16*16*16*16*16*16*16);
+	memset(p21, 100, 16*16*16*16*16*16*16);
+	memset(p22, 100, 16*16*16*16*16*16*16);
 	int prof;
 	clock_t begin,end;
-    int arr[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-    int dir[6][7];
 	board = sboard2(arr);
 	imprimir(board);
-	Pattern p1[2],p2[2];
+	Pattern p1[2],p2[2], prueba[4];
 	inipat(	board,pm1,p1);
+
+    
     //printf("hola\n");
+
+    /*abstractf(board, dir);
+    for(int i=0; i<6; i++){
+        for(int j=0; j<7; j++){
+            printf("dir[%d][%d] = %d\n", i, j, dir[i][j]);
+        }
+    }*/
 
 	//p11
 	nodosVis=0;
 	print(p1[0]);
+    
+    /*for(int z=0; z<7; z++){
+    Exp(p1[0], z, prueba);
+
+    print(prueba[0]);
+    print(prueba[1]);
+    print(prueba[2]);
+    print(prueba[3]);
+
+    printf("separador\n");
+    }*/
+
 	begin=clock();
 	prof = bfs(p1[0], p11);
 	end=clock();
@@ -355,6 +396,7 @@ int main(){
     while(1){
 
         board = sboard();
+        int dir[6][7];
         if(board.h == -1) break;
         abstractf(board, dir);
         setH(&board, heuristica2(dir));
