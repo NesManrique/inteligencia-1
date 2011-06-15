@@ -376,12 +376,11 @@ int main(){
 			}
 		}
 		turn =(n%2==0);
-		cout<< ini.value() <<endl;
 		nodosVis=0;
 		begin = clock();
 		value=abpruning(ini,MAXVALUE,0,MAXVALUE,turn);
 		end = clock();
-		printf("Jugada del PV: %d, Valor=%ud, Nodos Visitados = %ld, tiempo tomado = %.2lf\n",
+		printf("Jugada del PV: %d, Valor=%u, Nodos Visitados = %ld, tiempo tomado = %.2lf\n",
 				n,value,nodosVis,((double) (end-begin))/CLOCKS_PER_SEC);
 	}
 	return 0;
