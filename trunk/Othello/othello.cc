@@ -2,10 +2,11 @@
 // Universidad Simon Bolivar, 2005.
 // Author: Blai Bonet
 // Last Revision: 06/01/11
-// Modified by: 
+// Modified by: Johann 
 
 #include <iostream>
 #include "assert.h"
+#include <time.h>
 
 using namespace std;
 
@@ -14,6 +15,8 @@ using namespace std;
 #define MAXVALUE      1000
 #define DIM           36
 #define N             6
+
+long nodosVis;
 
 const int rows[][7] = { { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 },
                         { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 },
@@ -305,41 +308,50 @@ void state_t::print_bits(ostream &os) const {
         os << (free_ & (1<<i) ? '1' : '0');
 }
 
-unsigned abpruning(state_t s, unsigned d, unsigned a, unsigned b, bool t, unsigned &j){
+unsigned abpruning(state_t s, unsigned d, unsigned a, unsigned b, bool t){
+	nodosVis++;
+	if(d == 0 || s.terminal()) return s.value();
+	bool canMove = false;
+	unsigned value;
+	if(t){
+		for(int i=0;i<DIM;i++){
+			if(s.outflank(true,i)){
+				canMove=true;
+				state_t sucesor = s.black_move(i);
+				b = MIN(b, abpruning(sucesor, d-1, a, b,false));
+				if(a>=b) break;
+			}
+		}
+		if(!canMove){
+			b=MIN(b,abpruning(s, d-1, a, b,false));
+		}
+		return b;
+	}else{
 
-    if(d == 0 || s.terminal()) return s.value();
-
-    if(t){
-    	
-    	para cada sucesor{
-    		b = MIN(b, abpruning(sucesor, d-1, a, b));
-    		if(a>=b) break;
-        }
-
-        return b;
-    }else{
-
-    	para cada sucesor{
-    		a = MAX(a, abpruning(sucesor, d-1, a, b));
-    		if(a>=b) break;
-    	}
-
-    	return a;
-    }
-
+		for(int i=0;i<DIM;i++){
+			if(s.outflank(false,i)){
+				canMove=true;
+				state_t sucesor = s.white_move(i);
+				a = MAX(a, abpruning(sucesor, d-1, a, b,true));
+				if(a>=b) break;
+			}
+		}
+		if(!canMove){
+			a=MAX(a,abpruning(s, d-1, a, b,true));
+		}
+		return a;
+	}
 }
 
-unsigned 
-
 int main(){
-    state_t ini;
-    state_t otro = ini.move(true,12);
-    otro.print_bits(cout);
+	clock_t begin,end;
+/*    state_t otro = ini.move(true,12)
+	otro.print_bits(cout);
     cout << "\n";
     otro.print(cout,0);
     cout << "\n";
-    for(int i=0;i<36;i++){
-        if(otro.outflank(true,i)){
+    for(int i=0;i<37;i++){
+        if(otro.is_black_move(i)){
             cout <<'b'<< i << endl;
         }else if(otro.outflank(false,i)){
             cout <<'w'<< i << endl;
@@ -347,7 +359,30 @@ int main(){
         }
     }
 
+*/
 
-
-    return 0;
+	while(1){	
+		int value,n;
+		bool turn;
+		//avanzar jugadas
+		scanf("%d",&n);
+		if(n==-1) break;
+		state_t ini;
+		for(int i=0;i<n;i++){
+			if(i%2==0){
+				ini = ini.black_move(PV[i]);
+			}else{
+				ini = ini.white_move(PV[i]);
+			}
+		}
+		turn =(n%2==0);
+		cout<< ini.value() <<endl;
+		nodosVis=0;
+		begin = clock();
+		value=abpruning(ini,MAXVALUE,0,MAXVALUE,turn);
+		end = clock();
+		printf("Jugada del PV: %d, Valor=%ud, Nodos Visitados = %ld, tiempo tomado = %.2lf\n",
+				n,value,nodosVis,((double) (end-begin))/CLOCKS_PER_SEC);
+	}
+	return 0;
 }
