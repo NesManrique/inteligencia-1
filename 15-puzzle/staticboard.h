@@ -8,11 +8,12 @@ typedef struct estado{
     short h;
 } State;
 
-short Lookup [16][2] ={{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3},{2,0},{2,1},{2,2},{2,3},{3,0},{3,1},{3,2},{3,3}};
+unsigned short Lookup [16][2] ={{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3},{2,0},{2,1},{2,2},{2,3},{3,0},{3,1},{3,2},{3,3}};
 
 /* Funcion que calcula la heuristica */
 short heuristica(State s);
 short heuristica2(int dir[6][7]);
+void imprimir(State s);
 
 /* Constructor */
 State sboard(){
@@ -39,12 +40,14 @@ State sboard(){
 }
 
 /* Constructor a partir de arreglo*/
-State sboard2(int arr[]){
+State sboard2(short arr[]){
     State board;
 	int i;
 
     for(i=0; i<16; i++){
-        board.tablero[Lookup[i][0]][Lookup[i][1]]= arr[i];
+
+		printf("%d %d \n",Lookup[i][0],arr[i]);
+        board.tablero[Lookup[i][0]][Lookup[i][1]]= (unsigned short)arr[i];
         if(!arr[i]){
             board.white[0] = Lookup[i][0];
             board.white[1] = Lookup[i][1];
@@ -52,7 +55,7 @@ State sboard2(int arr[]){
     }	
   
     //board.h = heuristica(board);
-
+	imprimir(board);
     return board;
 }
 
