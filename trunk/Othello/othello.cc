@@ -4,6 +4,8 @@
 // Last Revision: 06/01/11
 // Modified by: Johann 
 
+#define NDEBUG
+#include <stdio.h>
 #include <iostream>
 #include "assert.h"
 #include <time.h>
@@ -366,6 +368,7 @@ int main(){
 		bool turn;
 		//avanzar jugadas
 		scanf("%d",&n);
+        cerr << n;
 		if(n==-1) break;
 		state_t ini;
 		for(int i=0;i<n;i++){
