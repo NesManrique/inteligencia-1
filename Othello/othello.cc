@@ -345,6 +345,26 @@ unsigned abpruning(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 	}
 }
 
+int alphaBeta(state_t s, unsigned char d, int a, int b, bool t){
+	nodosVis++;
+	if(d == 0 || s.terminal()) return s.value();
+	bool canMove = false;
+	int value;
+	for(int i=0;i<DIM;i++){
+		if(s.outflank(t,i)){
+			canMove=true;
+			state_t sucesor = s.move(t,i);
+			a = MAX(a, -alphaBeta(sucesor, d-1, -b, -a,!t));
+			if(a>=b) break;
+		}
+	}
+	if(!canMove){
+		a=MAX(a,-alphaBeta(s, d-1, -b, -a,!t));
+	}
+	return a;
+}
+
+
 int main(){
 	clock_t begin,end;
 /*    state_t otro = ini.move(true,12)
