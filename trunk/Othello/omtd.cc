@@ -339,82 +339,140 @@ typedef struct info{
     unsigned int value;
     char type;
     unsigned char depth;
-} info;
+}info;
+
+typedef struct info2{
+    unsigned alpha;
+    unsigned beta;
+}info2;
+   
 
 hash_map<state_t,info > hashstate;
+hash_map<state_t,info2 > hashstate2;
+
+unsigned alphaBeta1(state_t s, unsigned d, unsigned a, unsigned b, bool t){
+	nodosVis++;
+	unsigned value;
+	hash_map<state_t,info2>::iterator it= hashstate2.find(s);
+	info2 as;
+	as.alpha=0;
+	as.beta=MAXVALUE;
+	if(!(it==hashstate2.end())){
+		as = it->second;
+		if(as.alpha >= b) return as.alpha;
+		if(as.beta <=a) return as.beta;
+		//a=as.alpha;
+	//	b=as.beta;
+	}
+
+	if(d == 0 || s.terminal()) return s.value();
+	else if(t){
+		value=MAXVALUE;
+		unsigned beta =b;
+		bool canMove = false;
+		for(int i=4;i<DIM;i++){
+			if(s.outflank(true,i)){
+				canMove=true;
+				state_t sucesor = s.black_move(i);
+				value =  MIN(value,alphaBeta1(sucesor,d-1,a,beta,false));
+				beta = MIN(beta,value );
+				if(value <= a) break;
+			}
+		}
+		if(!canMove){
+			value=MIN(value,alphaBeta1(s, d-1, a, b,false));
+		}
+	}else{
+		 value=0;
+		unsigned alpha=a;
+		bool canMove = false;
+
+		for(int i=4;i<DIM;i++){
+			if(s.outflank(false,i)){
+				canMove=true;
+				state_t sucesor = s.white_move(i);
+				value =  MAX(value,alphaBeta1(sucesor,d-1,alpha,b,true));
+				alpha = MAX(alpha,value );
+				if(value >= b) break;
+			}
+		}
+		if(!canMove){
+			value=MAX(value,alphaBeta1(s, d-1, a, b,true));
+		}
+	}
+	if(value>b) as.beta = value; 
+	if(value<a) as.alpha = value;
+	hashstate2.erase(it);
+	hashstate2[s]=as;
+		return value;
+}
+
+
+
+
+
 
 unsigned alphaBeta2(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 	nodosVis++;
-    //coll[h(s)%100000] = coll[h(s)%100000]+1;
-    hash_map<state_t,info>::iterator it= hashstate.find(s);
-    
-    if(! (it==hashstate.end()) && ((*it).second).depth >= d ){
-        info as = (*it).second;
-        if(as.type == EXACT_VALUE) return as.value;
-        if(as.type==LOWERBOUND && as.value > a) a = as.value;
-        else if(as.type==UPPERBOUND && as.value < b) b = as.value;
-        if( a>= b) return as.value;
-    }
+	//coll[h(s)%100000] = coll[h(s)%100000]+1;
+	hash_map<state_t,info>::iterator it= hashstate.find(s);
+	unsigned value;
+
+	if(! (it==hashstate.end()) && ((*it).second).depth >= d ){
+		info as = (*it).second;
+		if(as.type == EXACT_VALUE) return as.value;
+		if(as.type==LOWERBOUND && as.value > a) a = as.value;
+		else if(as.type==UPPERBOUND && as.value < b) b = as.value;
+		if( a>= b) return as.value;
+	}
 
 	if(d == 0 || s.terminal()){
-        unsigned v=s.value();
-        info as;
-        as.depth=d;
-        as.value=v;
-        if(v<=a) as.type=LOWERBOUND;
-        else if(v>=b) as.type=UPPERBOUND;
-        else as.type=EXACT_VALUE;
-        hashstate[s]=as;
-        return v;
-    }
+		value=s.value();
+	}
 
-	unsigned value;
-	bool canMove = false;
-	if(t){
-        unsigned beta = b;
+	else if(t){
+		bool canMove = false;
+		unsigned beta = b;
+		value=MAXVALUE;
 		for(int i=0;i<DIM;i++){
 			if(s.outflank(true,i)){
 				canMove=true;
 				state_t sucesor = s.black_move(i);
-				b = MIN(b, alphaBeta2(sucesor, d-1, a, b,false));
-				if(a>=b) break;
+				value = MIN(value, alphaBeta2(sucesor, d-1, a, beta,false));
+				beta = MIN(value,beta);
+				if(value<=a) break;
 			}
 		}
 		if(!canMove){
-			b=MIN(b,alphaBeta2(s, d-1, a, b,false));
+			value=MIN(value,alphaBeta2(s, d-1, a, b,false));
 		}
-   
-        info as;
-        as.depth=d;
-        as.value=b;
-        if(b<=a) as.type=LOWERBOUND;
-        else if(b>=beta) as.type=UPPERBOUND;
-        else as.type=EXACT_VALUE;
-        hashstate[s]=as; 
-		return b;
+
 	}else{
-        unsigned alpha =a;
+		bool canMove = false;
+		unsigned alpha =a;
+		value =0;
 		for(int i=0;i<DIM;i++){
 			if(s.outflank(false,i)){
 				canMove=true;
 				state_t sucesor = s.white_move(i);
-				a = MAX(a, alphaBeta2(sucesor, d-1, a, b,true));
-				if(a>=b) break;
+				value = MAX(value, alphaBeta2(sucesor, d-1, alpha, b,true));
+				alpha = MAX(alpha,value);
+				if(value>=b) break;
 			}
 		}
 		if(!canMove){
-			a=MAX(a,alphaBeta2(s, d-1, a, b,true));
+			value=MAX(value,alphaBeta2(s, d-1, a, b,true));
 		}
 
-        info as;
-        as.depth=d;
-        as.value=a;
-        if(a<=alpha) as.type=LOWERBOUND;
-        else if(a>=b) as.type=UPPERBOUND;
-        else as.type=EXACT_VALUE;
-        hashstate[s]=as;
-		return a;
 	}
+	info as;
+	as.depth=d;
+	as.value=value;
+	if(value<=a) as.type=LOWERBOUND;
+	else if(value>=b) as.type=UPPERBOUND;
+	else as.type=EXACT_VALUE;
+	hashstate[s]=as; 
+	return value;
 }
 
 int alphaBeta(state_t s, unsigned char d, int a, int b, bool t){
@@ -590,20 +648,16 @@ int alphaBetaTT(state_t s, unsigned char depth, int alpha, int beta, bool t){
 }
 
 int mtd(state_t s, int f, bool t){
-
-    int LB = -MAXVALUE;
-    int UB = MAXVALUE;
     int g = f;
+    int UB = MAXVALUE;
+    int LB = 0;
+
     int beta;
     while(LB<UB){
-
-        if(g == LB) beta = g+1;
-        else beta = g;
-
-        g = alphaBeta2(s, 255, beta-1, beta, t);
-
-        if(g<beta) UB = g;
-        else LB = g;
+		hashstate2.clear();
+        if(g == LB) beta = g+1; else beta = g;
+        g = alphaBeta1(s, 255, beta-1, beta, t);
+        if(g<beta) UB = g;  else LB = g;
     }
 
     return g;
@@ -616,7 +670,6 @@ int main(){
 	while(1){	
 		int value,n;
 		bool turn;
-        hashstate.clear();
         
 		//avanzar jugadas
 		scanf("%d",&n);
@@ -634,10 +687,8 @@ int main(){
 		turn =(n%2==0);
 		nodosVis=0;
 		begin = clock();
-        //if(turn) value=alphaBeta2(ini,255,0,MAXVALUE,turn);
-        //else value=alphaBeta2(ini,255,0,MAXVALUE,turn);
-        if(turn) value=mtd(ini,35,turn);
-        else value=mtd(ini,35,turn);
+        //value=alphaBeta1(ini,255,0,MAXVALUE,turn);
+        value=mtd(ini,50,turn);
 		end = clock();
 		printf("Jugada del PV: %d, Valor=%d, Nodos Visitados = %ld, tiempo tomado = %.2lf\n",
 				n,value,nodosVis,((double) (end-begin))/CLOCKS_PER_SEC);
