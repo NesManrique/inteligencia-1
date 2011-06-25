@@ -23,11 +23,11 @@ using namespace __gnu_cxx;
 #define LOWERBOUND    'l'
 #define UPPERBOUND    'u'
 #define EXACT_VALUE   'e'
+#define MAXTABLESIZE  25000000
 
 long nodosVis;
 
 
-unsigned coll[100000];
 const int rows[][7] = { { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 },
                         { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 }, { 4, 5, 6, 7, 8, 9,-1 },
                         {10,11,12,13,14,15,-1 }, {10,11,12,13,14,15,-1 }, {10,11,12,13,14,15,-1 },
@@ -80,6 +80,9 @@ const int dia2[][7] = { { 4,-1,-1,-1,-1,-1,-1 }, { 5,10,-1,-1,-1,-1,-1 }, { 6,11
 // moves on the principal variation
 static int PV[] = { 12, 21, 26, 13, 22, 18,  7,  6,  5, 27, 33, 23, 17, 11, 19, 15,
                     14, 31, 20, 32, 30, 10, 25, 24, 34, 28, 16,  4, 29, 35, 36,  8, 9 };
+
+static int Mv[] = {4,9,30,35,5,6,7,8,10,15,16,19,20,23,24,29,31,32,33,34,12,13,17,18,21,22,26,27,11,14,25,28};
+
 
 class state_t {
   protected:
@@ -342,8 +345,8 @@ typedef struct info{
 }info;
 
 typedef struct info2{
-    unsigned alpha;
-    unsigned beta;
+    unsigned char alpha;
+    unsigned char beta;
 }info2;
    
 
@@ -356,7 +359,7 @@ unsigned alphaBeta1(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 	hash_map<state_t,info2>::iterator it= hashstate2.find(s);
 	info2 as;
 	as.alpha=0;
-	as.beta=MAXVALUE;
+	as.beta=255;
 	if(!(it==hashstate2.end())){
 	 	as = it->second;
 		if(as.alpha >= b) return as.alpha;
@@ -370,10 +373,10 @@ unsigned alphaBeta1(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 		value=MAXVALUE;
 		unsigned beta =b;
 		bool canMove = false;
-		for(int i=4;i<DIM;i++){
-			if(s.outflank(true,i)){
+		for(int i=0;i<DIM-4;i++){
+			if(s.outflank(true,Mv[i])){
 				canMove=true;
-				state_t sucesor = s.black_move(i);
+				state_t sucesor = s.black_move(Mv[i]);
 				value =  MIN(value,alphaBeta1(sucesor,d-1,a,beta,false));
 				beta = MIN(beta,value );
 				if(value <= a) break;
@@ -387,10 +390,10 @@ unsigned alphaBeta1(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 		unsigned alpha=a;
 		bool canMove = false;
 
-		for(int i=4;i<DIM;i++){
-			if(s.outflank(false,i)){
+		for(int i=0;i<DIM-4;i++){
+			if(s.outflank(false,Mv[i])){
 				canMove=true;
-				state_t sucesor = s.white_move(i);
+				state_t sucesor = s.white_move(Mv[i]);
 				value =  MAX(value,alphaBeta1(sucesor,d-1,alpha,b,true));
 				alpha = MAX(alpha,value );
 				if(value >= b) break;
@@ -400,10 +403,13 @@ unsigned alphaBeta1(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 			value=MAX(value,alphaBeta1(s, d-1, a, b,true));
 		}
 	}
+	if(hashstate2.size()<MAXTABLESIZE){
 	if(value<b) as.beta = value; 
 	if(value>a) as.alpha = value;
 	hashstate2[s]=as;
+	}
 		return value;
+	
 }
 
 
@@ -656,6 +662,7 @@ int mtd(state_t s, int f, bool t){
         if(g == LB) beta = g+1; else beta = g;
         g = alphaBeta1(s, 255, beta-1, beta, t);
         if(g<beta) UB = g;  else LB = g;
+	//	cout << hashstate2.size()<<" "<<hashstate.bucket_count()<<endl;
     }
 
     return g;
@@ -663,8 +670,6 @@ int mtd(state_t s, int f, bool t){
 
 int main(){
 	clock_t begin,end;
-    memset(coll, 0, 100000*sizeof(int));
-
 	while(1){	
 		int value,n;
 		bool turn;
@@ -681,11 +686,9 @@ int main(){
 				ini = ini.white_move(PV[i]);
 			}
 		}
- //       ini.print(cout,0);
 		turn =(n%2==0);
 		nodosVis=0;
 		begin = clock();
-        //value=alphaBeta1(ini,255,0,MAXVALUE,turn);
         value=mtd(ini,40,turn);
 		end = clock();
 		printf("Jugada del PV: %d, Valor=%d, Nodos Visitados = %ld, tiempo tomado = %.2lf\n",
