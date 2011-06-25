@@ -358,7 +358,7 @@ unsigned alphaBeta1(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 	as.alpha=0;
 	as.beta=MAXVALUE;
 	if(!(it==hashstate2.end())){
-		as = it->second;
+	 	as = it->second;
 		if(as.alpha >= b) return as.alpha;
 		if(as.beta <=a) return as.beta;
 		//a=as.alpha;
@@ -400,9 +400,8 @@ unsigned alphaBeta1(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 			value=MAX(value,alphaBeta1(s, d-1, a, b,true));
 		}
 	}
-	if(value>b) as.beta = value; 
-	if(value<a) as.alpha = value;
-	hashstate2.erase(it);
+	if(value<b) as.beta = value; 
+	if(value>a) as.alpha = value;
 	hashstate2[s]=as;
 		return value;
 }
@@ -654,7 +653,6 @@ int mtd(state_t s, int f, bool t){
 
     int beta;
     while(LB<UB){
-		hashstate2.clear();
         if(g == LB) beta = g+1; else beta = g;
         g = alphaBeta1(s, 255, beta-1, beta, t);
         if(g<beta) UB = g;  else LB = g;
@@ -673,7 +671,7 @@ int main(){
         
 		//avanzar jugadas
 		scanf("%d",&n);
-        cerr << n;
+        cerr << n<< "\a";
 		if(n==-1) break;
 		state_t ini;
 		for(int i=0;i<n;i++){
@@ -688,7 +686,7 @@ int main(){
 		nodosVis=0;
 		begin = clock();
         //value=alphaBeta1(ini,255,0,MAXVALUE,turn);
-        value=mtd(ini,50,turn);
+        value=mtd(ini,40,turn);
 		end = clock();
 		printf("Jugada del PV: %d, Valor=%d, Nodos Visitados = %ld, tiempo tomado = %.2lf\n",
 				n,value,nodosVis,((double) (end-begin))/CLOCKS_PER_SEC);
