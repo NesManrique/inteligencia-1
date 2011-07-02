@@ -23,7 +23,7 @@ using namespace __gnu_cxx;
 #define LOWERBOUND    'l'
 #define UPPERBOUND    'u'
 #define EXACT_VALUE   'e'
-#define MAXTABLESIZE  25000000
+#define MAXTABLESIZE  60000000
 
 long nodosVis;
 
@@ -325,12 +325,6 @@ void state_t::print_bits(ostream &os) const {
         os << (free_ & (1<<i) ? '1' : '0');
 }
 
-
-/*struct hashst{
-    size_t operator()(state_t s){
-    }
-};*/
-
 namespace __gnu_cxx {
   template<> class hash<state_t> {
     public:
@@ -338,24 +332,16 @@ namespace __gnu_cxx {
   };
 };
 
-typedef struct info{
-    unsigned int value;
-    char type;
-    unsigned char depth;
-}info;
-
 typedef struct info2{
     unsigned char alpha;
     unsigned char beta;
 }info2;
-   
 
-hash_map<state_t,info > hashstate;
 hash_map<state_t,info2 > hashstate2;
 
-unsigned alphaBeta1(state_t s, unsigned d, unsigned a, unsigned b, bool t){
+unsigned alphaBeta(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 	nodosVis++;
-	unsigned value;
+	unsigned value, v;
 	hash_map<state_t,info2>::iterator it= hashstate2.find(s);
 	info2 as;
 	as.alpha=0;
@@ -364,303 +350,66 @@ unsigned alphaBeta1(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 	 	as = it->second;
 		if(as.alpha >= b) return as.alpha;
 		if(as.beta <=a) return as.beta;
-		//a=as.alpha;
-	//	b=as.beta;
 	}
 
 	if(d == 0 || s.terminal()) return s.value();
 	else if(t){
 		value=MAXVALUE;
-		unsigned beta =b;
+		unsigned beta = b;
 		bool canMove = false;
 		for(int i=0;i<DIM-4;i++){
 			if(s.outflank(true,Mv[i])){
 				canMove=true;
 				state_t sucesor = s.black_move(Mv[i]);
-				value =  MIN(value,alphaBeta1(sucesor,d-1,a,beta,false));
+                v = alphaBeta(sucesor, d-1, a, beta,false);
+				value = MIN(value, v);
 				beta = MIN(beta,value );
 				if(value <= a) break;
 			}
 		}
 		if(!canMove){
-			value=MIN(value,alphaBeta1(s, d-1, a, b,false));
+                v = alphaBeta(s, d-1, a, b,false);
+				value = MIN(value, v);
 		}
 	}else{
 		 value=0;
-		unsigned alpha=a;
+		unsigned alpha = a;
 		bool canMove = false;
 
 		for(int i=0;i<DIM-4;i++){
 			if(s.outflank(false,Mv[i])){
 				canMove=true;
 				state_t sucesor = s.white_move(Mv[i]);
-				value =  MAX(value,alphaBeta1(sucesor,d-1,alpha,b,true));
+                v = alphaBeta(sucesor, d-1, alpha, b,true);
+				value = MAX(value, v);
 				alpha = MAX(alpha,value );
 				if(value >= b) break;
 			}
 		}
 		if(!canMove){
-			value=MAX(value,alphaBeta1(s, d-1, a, b,true));
+                v = alphaBeta(s, d-1, a, b,true);
+				value = MAX(value, v);
 		}
 	}
 	if(hashstate2.size()<MAXTABLESIZE){
-	if(value<b) as.beta = value; 
-	if(value>a) as.alpha = value;
-	hashstate2[s]=as;
+	    if(value<b) as.beta = value; 
+	    if(value>a) as.alpha = value;
+	    hashstate2[s]=as;
 	}
 		return value;
 	
-}
-
-
-
-
-
-
-unsigned alphaBeta2(state_t s, unsigned d, unsigned a, unsigned b, bool t){
-	nodosVis++;
-	//coll[h(s)%100000] = coll[h(s)%100000]+1;
-	hash_map<state_t,info>::iterator it= hashstate.find(s);
-	unsigned value;
-
-	if(! (it==hashstate.end()) && ((*it).second).depth >= d ){
-		info as = (*it).second;
-		if(as.type == EXACT_VALUE) return as.value;
-		if(as.type==LOWERBOUND && as.value > a) a = as.value;
-		else if(as.type==UPPERBOUND && as.value < b) b = as.value;
-		if( a>= b) return as.value;
-	}
-
-	if(d == 0 || s.terminal()){
-		value=s.value();
-	}
-
-	else if(t){
-		bool canMove = false;
-		unsigned beta = b;
-		value=MAXVALUE;
-		for(int i=0;i<DIM;i++){
-			if(s.outflank(true,i)){
-				canMove=true;
-				state_t sucesor = s.black_move(i);
-				value = MIN(value, alphaBeta2(sucesor, d-1, a, beta,false));
-				beta = MIN(value,beta);
-				if(value<=a) break;
-			}
-		}
-		if(!canMove){
-			value=MIN(value,alphaBeta2(s, d-1, a, b,false));
-		}
-
-	}else{
-		bool canMove = false;
-		unsigned alpha =a;
-		value =0;
-		for(int i=0;i<DIM;i++){
-			if(s.outflank(false,i)){
-				canMove=true;
-				state_t sucesor = s.white_move(i);
-				value = MAX(value, alphaBeta2(sucesor, d-1, alpha, b,true));
-				alpha = MAX(alpha,value);
-				if(value>=b) break;
-			}
-		}
-		if(!canMove){
-			value=MAX(value,alphaBeta2(s, d-1, a, b,true));
-		}
-
-	}
-	info as;
-	as.depth=d;
-	as.value=value;
-	if(value<=a) as.type=LOWERBOUND;
-	else if(value>=b) as.type=UPPERBOUND;
-	else as.type=EXACT_VALUE;
-	hashstate[s]=as; 
-	return value;
-}
-
-int alphaBeta(state_t s, unsigned char d, int a, int b, bool t){
-	nodosVis++;
-    hash_map<state_t,info>::iterator it= hashstate.find(s);
-    int oa=a;
-
-   /* if(!(it==hashstate.end()) && ((*it).second).depth >= d){
-        info af = (*it).second;
-        if(af.type == EXACT_VALUE) // stored value is exact
-            return af.value;
-        if(af.type == LOWERBOUND && af.value > a)  
-            a = af.value;           // update lowerbound alpha if needed
-        else if(af.type == UPPERBOUND && af.value < b)
-            b = af.value;            // update upperbound beta if needed
-        if(a >= b)
-            return af.value;            // if lowerbound surpasses upperbound
-    }
-*/
-	if(d == 0 || s.terminal()){
- //       info as;
-        int value = s.value();
- /*       as.value = value;
-        as.depth = d;
-        if(value <= a){           // a lowerbound value
-            as.type = LOWERBOUND;
-        }else if(value >= b){         // an upperbound value
-            as.type = UPPERBOUND;
-        }else{                           // a true minimax value
-            as.type = EXACT_VALUE;
-        }
-        //hashstate.erase(it);
-        hashstate[s] = as;
-
-*/        return value;
-    }
-
-	bool canMove = false;
-	int value;
-    //int best = -MAXVALUE-1;
-	for(int i=0;i<DIM;i++){
-		if(s.outflank(t,i)){
-			canMove=true;
-			state_t sucesor = s.move(t,i);
-			a = MAX(a, -alphaBeta(sucesor, d-1, -b, -a,!t));
-            //a = MAX(a, best);
-			if(a>=b) break;
-		}
-	}
-	if(!canMove){
-		a = MAX(a,-alphaBeta(s, d-1, -b, -a,!t));
-        //a = MAX(a, best);
-	}
-/*
-    info y;
-    y.value = a;
-    y.depth = d;
-    if(a <= oa){           // a lowerbound value
-        y.type = LOWERBOUND;
-    }else if(best >= b){         // an upperbound value
-        y.type = UPPERBOUND;
-    }else{                           // a true minimax value
-        y.type = EXACT_VALUE;
-    }
-    //hashstate.erase(it);
-    hashstate[s] = y;
-*/
-	return a;
-}
-
-int alphaBet(state_t s, unsigned char d, int a, int b, bool t){
-	nodosVis++;
-	if(d == 0 || s.terminal()) return s.value();
-	bool canMove = false;
-	int value;
-	for(int i=0;i<DIM;i++){
-		if(s.outflank(t,i)){
-			canMove=true;
-			state_t sucesor = s.move(t,i);
-			a = MAX(a, -alphaBeta(sucesor, d-1, -b, -a,!t));
-			if(a>=b) break;
-		}
-	}
-	if(!canMove){
-		a=MAX(a,-alphaBeta(s, d-1, -b, -a,!t));
-	}
-	return a;
-}
-
-
-
-int alphaBetaTT(state_t s, unsigned char depth, int alpha, int beta, bool t){
-
-    int value;
-    nodosVis++;
-    hash_map<state_t,info>::iterator it= hashstate.find(s);
-   // printf("%u ",depth);
-/*
-    if(!(it==hashstate.end()) && ((*it).second).depth >= depth){
-
-        if(((*it).second).type == EXACT_VALUE) // stored value is exact
-            return ((*it).second).value;
-        if(((*it).second).type == LOWERBOUND && ((*it).second).value > alpha)  
-            alpha = ((*it).second).value;           // update lowerbound alpha if needed
-        else if(((*it).second).type == UPPERBOUND && ((*it).second).value < beta)
-            beta = ((*it).second).value;            // update upperbound beta if needed
-        if(alpha >= beta)
-            return ((*it).second).value;            // if lowerbound surpasses upperbound
-    }
-*/
-    if(depth == 0 || s.terminal()){
-     //   s.print(cout,0);
-       //  printf("%u ",depth);
-
-        value = s.value();
-/*        info as;
-        as.value = value;
-        as.depth = depth;
-        if(value <= alpha){           // a lowerbound value
-            as.type = LOWERBOUND;
-        }else if(value >= beta){         // an upperbound value
-            as.type = UPPERBOUND;
-        }else{                           // a true minimax value
-            as.type = EXACT_VALUE;
-        }
-        hashstate.erase(it);
-        hashstate[s] = as;
-  */      //s.print(cout, 0);
-        //printf("value %d %c a:%d  b:%d \n", value, as.type,alpha,beta);
-        return value;
-    }
-
- //   int best = -MAXVALUE-1;
-    bool canMove = false;    
-
-    for(int i=0;i<DIM;i++){
-	    if(s.outflank(t,i)){
-			canMove=true;
-			state_t sucesor = s.move(t, i);
-			value = -alphaBetaTT(sucesor, depth-1, -beta, -alpha, !t);
-        //printf("value %d a:%d  b:%d d:%d\n", value, alpha,beta,depth);
-
-   //         if(value > best) 
-     //           best = value;
-            if(value > alpha)
-                alpha = value;
-            if(alpha >= beta)
-                break;
-		}
-    }
-
-    if(!canMove){
-        value = -alphaBetaTT(s, depth-1, -beta, -alpha, !t);
-//        if(value > best) 
-//            best = value;
-        if(value > alpha)
-            alpha = value;
-    }
-
-/*    info y;
-    y.value = best;
-    y.depth = depth;
-    if(best <= alpha){           // a lowerbound value
-        y.type = LOWERBOUND;
-    }else if(best >= beta){         // an upperbound value
-        y.type = UPPERBOUND;
-    }else{                           // a true minimax value
-        y.type = EXACT_VALUE;
-    }
-    hashstate.erase(it);
-    hashstate[s] = y;
-*/    return alpha;
 }
 
 int mtd(state_t s, int f, bool t){
     int g = f;
     int UB = MAXVALUE;
     int LB = 0;
-
     int beta;
+
+    //hashstate2.clear();
     while(LB<UB){
         if(g == LB) beta = g+1; else beta = g;
-        g = alphaBeta1(s, 255, beta-1, beta, t);
+        g = alphaBeta(s, 255, beta-1, beta, t);
         if(g<beta) UB = g;  else LB = g;
 	//	cout << hashstate2.size()<<" "<<hashstate.bucket_count()<<endl;
     }
@@ -688,6 +437,7 @@ int main(){
 		}
 		turn =(n%2==0);
 		nodosVis=0;
+        hashstate2.clear();
 		begin = clock();
         value=mtd(ini,40,turn);
 		end = clock();
