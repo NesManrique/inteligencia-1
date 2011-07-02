@@ -73,6 +73,8 @@ const int dia2[][7] = { { 4,-1,-1,-1,-1,-1,-1 }, { 5,10,-1,-1,-1,-1,-1 }, { 6,11
 static int PV[] = { 12, 21, 26, 13, 22, 18,  7,  6,  5, 27, 33, 23, 17, 11, 19, 15,
                     14, 31, 20, 32, 30, 10, 25, 24, 34, 28, 16,  4, 29, 35, 36,  8, 9 };
 
+static int Mv[] = {4,9,30,35,5,6,7,8,10,15,16,19,20,23,24,29,31,32,33,34,12,13,17,18,21,22,26,27,11,14,25,28};
+
 class state_t {
   protected:
     unsigned char t_; 
@@ -310,79 +312,47 @@ void state_t::print_bits(ostream &os) const {
         os << (free_ & (1<<i) ? '1' : '0');
 }
 
-unsigned abpruning(state_t s, unsigned d, unsigned a, unsigned b, bool t){
+unsigned alphaBeta(state_t s, unsigned d, unsigned a, unsigned b, bool t){
 	nodosVis++;
-	if(d == 0 || s.terminal()) return s.value();
+	if(d == 0 || s.terminal()) {return s.value();}
 	bool canMove = false;
 	unsigned value;
+    unsigned v;
 	if(t){
-		for(int i=0;i<DIM;i++){
-			if(s.outflank(true,i)){
+		for(int i=0;i<DIM-4;i++){
+			if(s.outflank(true,Mv[i])){
 				canMove=true;
-				state_t sucesor = s.black_move(i);
-				b = MIN(b, abpruning(sucesor, d-1, a, b,false));
-				if(a>=b) break;
+				state_t sucesor = s.black_move(Mv[i]);
+                v = alphaBeta(sucesor, d-1, a, b,false);
+				b = MIN(b, v);
+				if(a>=b) return a;
 			}
 		}
 		if(!canMove){
-			b=MIN(b,abpruning(s, d-1, a, b,false));
+                v = alphaBeta(s, d-1, a, b,false);
+				b = MIN(b, v);
 		}
 		return b;
 	}else{
-
-		for(int i=0;i<DIM;i++){
-			if(s.outflank(false,i)){
+		for(int i=0;i<DIM-4;i++){
+			if(s.outflank(false,Mv[i])){
 				canMove=true;
-				state_t sucesor = s.white_move(i);
-				a = MAX(a, abpruning(sucesor, d-1, a, b,true));
-				if(a>=b) break;
+				state_t sucesor = s.white_move(Mv[i]);
+                v = alphaBeta(sucesor, d-1, a, b,true);
+				a = MAX(a, v);
+				if(a>=b) return b;
 			}
 		}
 		if(!canMove){
-			a=MAX(a,abpruning(s, d-1, a, b,true));
+                v = alphaBeta(s, d-1, a, b,true);
+				a = MAX(a, v);
 		}
 		return a;
 	}
 }
 
-int alphaBeta(state_t s, unsigned char d, int a, int b, bool t){
-	nodosVis++;
-	if(d == 0 || s.terminal()) return s.value();
-	bool canMove = false;
-	int value;
-	for(int i=0;i<DIM;i++){
-		if(s.outflank(t,i)){
-			canMove=true;
-			state_t sucesor = s.move(t,i);
-			a = MAX(a, -alphaBeta(sucesor, d-1, -b, -a,!t));
-			if(a>=b) break;
-		}
-	}
-	if(!canMove){
-		a=MAX(a,-alphaBeta(s, d-1, -b, -a,!t));
-	}
-	return a;
-}
-
-
 int main(){
 	clock_t begin,end;
-/*    state_t otro = ini.move(true,12)
-	otro.print_bits(cout);
-    cout << "\n";
-    otro.print(cout,0);
-    cout << "\n";
-    for(int i=0;i<37;i++){
-        if(otro.is_black_move(i)){
-            cout <<'b'<< i << endl;
-        }else if(otro.outflank(false,i)){
-            cout <<'w'<< i << endl;
-
-        }
-    }
-
-*/
-
 	while(1){	
 		int value,n;
 		bool turn;
@@ -401,7 +371,7 @@ int main(){
 		turn =(n%2==0);
 		nodosVis=0;
 		begin = clock();
-		value=abpruning(ini,MAXVALUE,0,MAXVALUE,turn);
+		value=alphaBeta(ini,MAXVALUE,0,MAXVALUE,turn);
 		end = clock();
 		printf("Jugada del PV: %d, Valor=%u, Nodos Visitados = %ld, tiempo tomado = %.2lf\n",
 				n,value,nodosVis,((double) (end-begin))/CLOCKS_PER_SEC);
